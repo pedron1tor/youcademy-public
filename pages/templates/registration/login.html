@@ -1,0 +1,103 @@
+{%load static %}
+{% load socialaccount %}
+<!doctype html>
+<html lang="en">
+  <head>
+    {%include "tagmanager1.html"%}
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Log In - Youcademy</title>
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="shortcut icon" type="image/x-icon">
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="apple-touch-icon">
+    <!-- CSS files -->
+    {% include 'pages/headfiles.html' %}
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      :root {
+        --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+      }
+      body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+      }
+    </style>
+    {% load static %}
+  </head>
+  <body class="d-flex flex-column">
+    {%include "tagmanager2.html" %}
+    <script src="{% static 'dist/js/demo-theme.min.js' %}"></script>
+    <div class="page page-center">
+      <div class="container container-tight py-4">
+        {% include 'messages.html' %}
+        <div class="text-center mb-4">
+          <a href="/" class="navbar-brand navbar-brand-autodark"><img src="{% static 'webflow/images/Untitled-design.svg' %}" height="36" alt=""></a>
+        </div>
+        <div class="card card-md">
+          <div class="card-body">
+            <h2 class="h2 text-center mb-4">Login to your student or teacher account</h2>
+            <form method="post" autocomplete="off">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Email address</label>
+                <input type="email" class="form-control" placeholder="your@email.com" autocomplete="off" name="email" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">
+                  Password
+                  <span class="form-label-description"></span>
+                </label>
+                <div class="input-group input-group-flat">
+                  <input name="pwd" type="password" class="form-control" placeholder="Your password" autocomplete="off" id="password" required>
+                  <span class="input-group-text">
+                    <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip" onclick="togglePassword()">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
+                    </a>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-2"></div>
+              <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+              </div>
+              <div class="d-grid mt-2">  
+                <a href="{% provider_login_url 'google' %}"   class="btn btn-primary" style="background-color:black;"onmouseover=" this.style.backgroundColor='#4A4A4A';" onmouseout="this.style.backgroundColor='black';">
+                    <img src="{% static 'google.svg' %}" alt="google" style="width: 20px; height: 20px; margin-right: 5px;">
+                    Log in with Google
+                </a>
+              </div>
+             <div class="d-grid mt-2">
+              <a href="{% provider_login_url 'microsoft' %}" class="btn btn-primary" style="background-color: white; color: black; border: 1px solid black; display: inline-flex; align-items: center; text-decoration: none; font-family: Arial, sans-serif; transition: background-color 0.3s, color 0.3s;" onmouseover="this.style.backgroundColor='#f0f0f0';" onmouseout="this.style.backgroundColor='white';">
+                <img src="{% static 'microsoft.svg' %}" alt="Microsoft logo" style="width: 20px; height: 20px; margin-right: 10px;">
+                Log in with Microsoft
+            </a>
+            </div> 
+            </form>
+            <!-- <form action="" method="get" style="margin-bottom: 20px; margin-top: 20px;"> 
+              <button type="submit" class="btn" style="background-color: black; color: white; width: 100%; display: flex; align-items: center; justify-content: center; padding: 10px;">
+                  <img src="{% static 'login/micro.svg' %}" alt="Microsoft Logo" style="margin-right: 10px; height: 24px;">
+                  Sign in with your school account
+              </button>
+            </form> -->
+          </div>
+        </div>
+        <div class="text-center text-muted mt-3">
+          Don't have account yet? <a href="/pages/signup" tabindex="-1">Sign up</a>
+        </div>
+      </div>
+    </div>
+    <!-- Libs JS -->
+    <!-- Tabler Core -->
+    <script src="{% static 'dist/js/tabler.min.js' %}" defer></script>
+    <script src="{% static 'dist/js/demo.min.js' %}" defer></script>
+    <script>
+      function togglePassword() {
+        var passwordField = document.getElementById('password');
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+        } else {
+          passwordField.type = 'password';
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,435 @@
+{% extends "new_app_layout.html" %}
+
+{% block head %}
+<style>
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .thead-light {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Content -->
+<!-- Navbar Vertical -->
+{% include "student/navbar.html" %}
+<!-- End Navbar Vertical -->
+
+<!-- Sidebar Detached Content -->
+<div class="sidebar-detached-content mt-3 mt-lg-0" style="padding-left: 8.5rem; margin-left:8.5rem;">
+  <!-- Stats -->
+  <div class="card card-hover-shadow h-100" >
+    <div class="card-body">
+  {% comment %} <div class="row">
+    <div class="col-sm-12 col-xl-6 mb-3 mb-xl-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+        <div class="card-body">
+          <h6 class="card-subtitle">Writing This Week</h6>
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">-</h2>
+            </div>
+            <!-- End Col -->
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                <canvas class="js-chart" data-hs-chartjs-options='{
+                          "type": "line",
+                          "data": {
+                             "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May","8 May","9 May","10 May","11 May","12 May","13 May","14 May","15 May","16 May","17 May","18 May","19 May","20 May","21 May","22 May","23 May","24 May","25 May","26 May","27 May","28 May","29 May","30 May","31 May"],
+                             "datasets": [{
+                              "data": [21,20,24,20,18,17,15,17,18,30,31,30,30,35,25,35,35,40,60,90,90,90,85,70,75,70,30,30,30,50,72],
+                              "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
+                              "borderColor": "#377dff",
+                              "borderWidth": 2,
+                              "pointRadius": 0,
+                              "pointHoverRadius": 0
+                            }]
+                          },
+                          "options": {
+                             "scales": {
+                               "yAxes": [{
+                                 "display": false
+                               }],
+                               "xAxes": [{
+                                 "display": false
+                               }]
+                             },
+                            "hover": {
+                              "mode": "nearest",
+                              "intersect": false
+                            },
+                            "tooltips": {
+                              "postfix": "k",
+                              "hasIndicator": true,
+                              "intersect": false
+                            }
+                          }
+                        }'>
+                </canvas>
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+          <span class="badge bg-soft-success text-success">
+            <i class="bi-graph-up"></i> -%
+          </span>
+          <span class="text-body fs-6 ms-1">from -</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+
+    <div class="col-sm-6 col-xl-3 mb-3 mb-xl-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+        <div class="card-body">
+          <h6 class="card-subtitle">Days Until Deadline</h6>
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">-</h2>
+            </div>
+            <!-- End Col -->
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                <canvas class="js-chart" data-hs-chartjs-options='{
+                          "type": "line",
+                          "data": {
+                             "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May","8 May","9 May","10 May","11 May","12 May","13 May","14 May","15 May","16 May","17 May","18 May","19 May","20 May","21 May","22 May","23 May","24 May","25 May","26 May","27 May","28 May","29 May","30 May","31 May"],
+                             "datasets": [{
+                              "data": [25,18,30,31,35,35,60,60,60,75,21,20,24,20,18,17,15,17,30,120,120,120,100,90,75,90,90,90,75,70,60],
+                              "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
+                              "borderColor": "#377dff",
+                              "borderWidth": 2,
+                              "pointRadius": 0,
+                              "pointHoverRadius": 0
+                            }]
+                          },
+                          "options": {
+                             "scales": {
+                               "yAxes": [{
+                                 "display": false
+                               }],
+                               "xAxes": [{
+                                 "display": false
+                               }]
+                             },
+                            "hover": {
+                              "mode": "nearest",
+                              "intersect": false
+                            },
+                            "tooltips": {
+                              "postfix": "%",
+                              "hasIndicator": true,
+                              "intersect": false
+                            }
+                          }
+                        }'>
+                </canvas>
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+          <span class="badge bg-soft-danger text-danger">
+            <i class="bi-graph-down"></i> -%
+          </span>
+          <span class="text-body fs-6 ms-1">from -%</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+
+    <div class="col-sm-6 col-xl-3 mb-3 mb-xl-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+        <div class="card-body">
+          <h6 class="card-subtitle">Deadline Readiness</h6>
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">-%</h2>
+            </div>
+            <!-- End Col -->
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                <canvas class="js-chart" data-hs-chartjs-options='{
+                          "type": "line",
+                          "data": {
+                             "labels": ["1 May","2 May","3 May","4 May","5 May","6 May","7 May","8 May","9 May","10 May","11 May","12 May","13 May","14 May","15 May","16 May","17 May","18 May","19 May","20 May","21 May","22 May","23 May","24 May","25 May","26 May","27 May","28 May","29 May","30 May","31 May"],
+                             "datasets": [{
+                              "data": [21,20,24,15,17,30,30,35,35,35,40,60,12,90,90,85,70,75,43,75,90,22,120,120,90,85,100,92,92,92,92],
+                              "backgroundColor": ["rgba(55, 125, 255, 0)", "rgba(255, 255, 255, 0)"],
+                              "borderColor": "#377dff",
+                              "borderWidth": 2,
+                              "pointRadius": 0,
+                              "pointHoverRadius": 0
+                            }]
+                          },
+                          "options": {
+                             "scales": {
+                               "yAxes": [{
+                                 "display": false
+                               }],
+                               "xAxes": [{
+                                 "display": false
+                               }]
+                             },
+                            "hover": {
+                              "mode": "nearest",
+                              "intersect": false
+                            },
+                            "tooltips": {
+                              "postfix": "k",
+                              "hasIndicator": true,
+                              "intersect": false
+                            }
+                          }
+                        }'>
+                </canvas>
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+          <span class="badge bg-soft-secondary text-body">-%</span>
+          <span class="text-body fs-6 ms-1">from -</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+  </div> {% endcomment %}
+  <!-- End Stats -->
+
+  <!-- Card -->
+  <div class="card mb-3 mb-lg-5" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+    <!-- Header -->
+    <div class="card-header">
+      <div class="row justify-content-between align-items-center flex-grow-1">
+        <div class="col-md">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-header-title">Writing History</h4>
+          </div>
+        </div>
+        <!-- End Col -->
+  
+        <div class="col-auto">
+          <!-- Filter -->
+          <div class="row align-items-sm-center">
+            <!-- New Button -->
+            <div class="col-auto">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPrompt" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;">Add a New Prompt</button>
+              <div class="modal fade" id="createPrompt" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="addCourseModalLabel">Create New Prompt</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="post" id="promptForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <label for="course_name">Name</label>
+                          <input name="prompt_name" type="text" class="form-control" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:10px;">
+                          <label for="course_prompts">Prompt</label>
+                          <textarea id="exampleFormControlTextarea1" name="prompt" class="form-control" placeholder="Type out your prompt" rows="4" style="border:1px solid; border-color:#d3d3d3; position: relative;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="add_prompt" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;">Submit</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWriting" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;">Create new document</button>
+              <div class="modal fade" id="createWriting" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="addCourseModalLabel">Create New Document</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="post" id="courseForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <label for="course_name">Class</label>
+                          <select id="course_name" name="course_name" class="form-control" required>
+                            {% for course in courses %}
+                            <option value="{{ course.name }}_{{course.course_code}}">{{ course.name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label for="course_prompts">Available prompts</label>
+                          <select id="course_prompts" name="course_prompts" class="form-control" required>
+                            <!-- Options will be dynamically added here -->
+                            <option value="default">Default</option>
+                          </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="add_course">Submit</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End New Button -->
+          </div>
+          <!-- End Filter -->
+        </div>
+        <!-- End Col -->
+      </div>
+      <!-- End Row -->
+    </div>
+    <!-- End Header -->
+  
+    <!-- Table -->
+    <div class="table-responsive datatable-custom" style="max-height: 400px; overflow-y: auto;">
+      <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
+        <thead class="thead-light" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Deadline</th>
+            <th>Grade</th>
+            <th>Updated At</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ writing.title }}</td>
+            <td>{{ writing.type }}</td>
+            <td>{{ writing.deadline }}</td>
+            <td>{{ writing.grade }}</td>
+            <td>{{ writing.updated_at }}</td>
+            <td>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="writing_id" value="{{ writing.id }}">
+                <button type="submit" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black; ">View</button>
+              </form>
+            </td>
+          </tr>
+          {% for writing in texts %}
+          <tr>
+            <td>{{ writing.title }}</td>
+            <td>{{ writing.type }}</td>
+            <td>{{ writing.deadline }}</td>
+            <td>{{ writing.grade }}</td>
+            <td>{{ writing.updated_at }}</td>
+            <td>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="writing_id" value="{{ writing.id }}">
+                <button type="submit" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black; ">View</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- End Table -->
+  
+    <!-- Footer -->
+    <div class="card-footer">
+      <!-- Pagination -->
+      <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+        <div class="col-sm mb-2 mb-sm-0">
+        </div>
+        <!-- End Col -->
+        <div class="col-sm-auto">
+          <div class="d-flex justify-content-center justify-content-sm-end">
+            <!-- Pagination -->
+            <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const createWritingModal = document.getElementById('createWriting');
+
+    function addDefaultOption(promptsSelect) {
+      const defaultOption = document.createElement('option');
+      defaultOption.text = 'Default';
+      defaultOption.value = 'default';
+      promptsSelect.add(defaultOption);
+    }
+
+    function fetchAndPopulatePrompts(courseName) {
+      fetch(`/api/get_prompts/?course_name=${courseName}`)
+        .then(response => response.json())
+        .then(data => {
+          const promptsSelect = document.getElementById('course_prompts');
+          promptsSelect.innerHTML = '';
+          addDefaultOption(promptsSelect);
+          data.prompts.forEach(prompt => {
+            const option = document.createElement('option');
+            const truncatedPrompt = prompt.prompt.length > 20 ? prompt.prompt.substring(0, 20) + '...' : prompt.prompt;
+            option.text = `${prompt.name}: ${truncatedPrompt}`;
+            option.value = prompt.prompt;
+            promptsSelect.add(option);
+          });
+        });
+    }
+
+    createWritingModal.addEventListener('shown.bs.modal', function() {
+      const courseName = document.getElementById('course_name').value;
+      if (courseName) {
+        fetchAndPopulatePrompts(courseName);
+      }
+    });
+
+    document.getElementById('course_name').addEventListener('change', function() {
+      const courseName = this.value;
+      if (courseName) {
+        fetchAndPopulatePrompts(courseName);
+      }
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('#datatable').DataTable({
+      "pageLength": 10,
+      "paging": true,
+      "ordering": true,
+      "searching": true,
+      "columnDefs": [{
+        "targets": [0, 1, 4],
+        "orderable": false
+      }],
+      "order": [],
+      "info": true,
+      "pagingType": "simple" // This will add "Previous" and "Next" buttons
+    });
+  });
+</script> 
+{% endblock %}
+

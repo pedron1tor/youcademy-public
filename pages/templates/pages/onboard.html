@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+{%load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding - Youcademy</title>
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="shortcut icon" type="image/x-icon">
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="apple-touch-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .onboarding-container {
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .onboarding-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #4a4a4a;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control, .custom-select {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+            background-color: white;
+        }
+        .form-control:focus, .custom-select:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #764ba2;
+            border-color: #764ba2;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #5d3b82;
+            border-color: #5d3b82;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(93, 59, 130, 0.3);
+        }
+        .animate-in {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .custom-select {
+            position: relative;
+            cursor: pointer;
+        }
+        .custom-select::after {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .custom-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1;
+            display: none;
+        }
+        .custom-option {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .custom-option:hover {
+            background-color: #f8f9fa;
+        }
+        .custom-select.open .custom-options {
+            display: block;
+        }
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        #timezoneDropdown {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            display: none;
+            float: left;
+            min-width: 10rem;
+            padding: .5rem 0;
+            margin: .125rem 0 0;
+            font-size: 1rem;
+            color: #212529;
+            text-align: left;
+            list-style: none;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid rgba(0,0,0,.15);
+            border-radius: 0 0 10px 10px;
+        }
+        #timezoneDropdown.show {
+            display: block;
+        }
+        /* New styles for message banner */
+        #messageBanner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            animation: fadeInDown 0.5s ease-out;
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translate3d(-50%, -20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(-50%, 0, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="messageBanner"></div>
+    <div class="onboarding-container animate-in">
+        <h1 class="text-center mb-4">Welcome to Your Journey</h1>
+        <p class="lead text-center mb-5">We're thrilled to have you on board. Let's personalize your experience!</p>
+        <form id="onboardingForm" method="post">
+          {%csrf_token %}
+            <div class="mb-4">
+                <label for="occupation" class="form-label">What's your role?</label>
+                <div class="custom-select" id="occupationSelect">
+                    <div class="selected-option">Choose...</div>
+                    <div class="custom-options">
+                        <!-- Options will be populated by JavaScript -->
+                    </div>
+                </div>
+                <input type="hidden" id="occupation" name="occupation" required>
+            </div>
+            <div class="mb-4">
+                <label for="timezone" class="form-label">What's your timezone?</label>
+                <div class="custom-select-wrapper">
+                    <input type="text" class="form-control" id="timezoneSearch" placeholder="Search timezone...">
+                    <div class="dropdown-menu" id="timezoneDropdown"></div>
+                </div>
+                <input type="hidden" id="timezone" name="timezone" required>
+            </div>
+            <div class="mb-4">
+                <label for="color" class="form-label">Choose your vibe color</label>
+                <input type="color" class="form-control form-control-color w-100" id="color" value="#764ba2" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-3">Begin Your Adventure</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script>
+      const validOccupations = ['student', 'teacher'];
+      function isValidOccupation(occupation) {
+          return validOccupations.includes(occupation);
+      }
+        // Custom Select functionality
+        function setupCustomSelect(selectId, options, isSearchable = false) {
+            const select = document.getElementById(selectId);
+            const selectedOption = select.querySelector('.selected-option');
+            const optionsContainer = select.querySelector('.custom-options');
+            const hiddenInput = document.getElementById(selectId.replace('Select', ''));
+
+            // Clear any existing options
+            optionsContainer.innerHTML = '';
+
+            function toggleOptions() {
+                select.classList.toggle('open');
+            }
+
+            function selectOption(option) {
+                selectedOption.textContent = option.textContent;
+                hiddenInput.value = option.dataset.value;
+                toggleOptions();
+            }
+
+            function filterOptions(filter) {
+                const options = optionsContainer.querySelectorAll('.custom-option');
+                options.forEach(option => {
+                    if (option.textContent.toLowerCase().includes(filter.toLowerCase())) {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            }
+
+            select.addEventListener('click', (e) => {
+                if (e.target.classList.contains('custom-option')) {
+                    selectOption(e.target);
+                } else if (e.target !== selectedOption || !isSearchable) {
+                    toggleOptions();
+                }
+            });
+
+            if (isSearchable) {
+                selectedOption.addEventListener('input', (e) => {
+                    filterOptions(e.target.value);
+                });
+                selectedOption.addEventListener('focus', () => {
+                    select.classList.add('open');
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (!select.contains(e.target)) {
+                    select.classList.remove('open');
+                }
+            });
+
+            // Populate options
+            options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('custom-option');
+                optionElement.textContent = option.text;
+                optionElement.dataset.value = option.value;
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Setup occupation dropdown
+        setupCustomSelect('occupationSelect', [
+            { value: 'student', text: 'Student' },
+            { value: 'teacher', text: 'Teacher' }
+        ]);
+
+        // Setup timezone dropdown
+        const timezones = moment.tz.names();
+        const timezoneDropdown = document.getElementById('timezoneDropdown');
+        const timezoneSearch = document.getElementById('timezoneSearch');
+        const timezoneInput = document.getElementById('timezone');
+
+        function populateDropdown(filter = '') {
+            timezoneDropdown.innerHTML = '';
+            timezones.forEach(tz => {
+                if (tz.toLowerCase().includes(filter.toLowerCase())) {
+                    const item = document.createElement('a');
+                    item.classList.add('dropdown-item');
+                    item.textContent = tz;
+                    item.href = '#';
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        timezoneSearch.value = tz;
+                        timezoneInput.value = tz;
+                        timezoneDropdown.classList.remove('show');
+                    });
+                    timezoneDropdown.appendChild(item);
+                }
+            });
+        }
+
+        timezoneSearch.addEventListener('focus', () => {
+            populateDropdown();
+            timezoneDropdown.classList.add('show');
+        });
+
+        timezoneSearch.addEventListener('input', () => {
+            populateDropdown(timezoneSearch.value);
+            timezoneDropdown.classList.add('show');
+            // Clear the hidden input when the user starts typing
+            timezoneInput.value = '';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!timezoneSearch.contains(e.target) && !timezoneDropdown.contains(e.target)) {
+                timezoneDropdown.classList.remove('show');
+            }
+        });
+
+        // Function to check if the timezone is valid
+        function isValidTimezone(timezone) {
+            return timezones.includes(timezone);
+        }
+
+        // Function to show message banner
+        function showMessageBanner(message, duration = 3000) {
+            const banner = document.getElementById('messageBanner');
+            banner.textContent = message;
+            banner.style.display = 'block';
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, duration);
+        }
+
+        // Form submission
+        document.getElementById('onboardingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const occupation = document.getElementById('occupation').value;
+            const timezone = document.getElementById('timezone').value;
+            const color = document.getElementById('color').value;
+            
+            if (!isValidTimezone(timezone)) {
+                showMessageBanner('Please select a valid timezone from the dropdown list.', 5000);
+                return;
+            }
+            if (!isValidOccupation(occupation)) {
+              showMessageBanner('Please select a valid occupation from the dropdown list.', 5000);
+              return;
+          }
+            
+            console.log('Form submitted with:', { occupation, timezone, color });
+            showMessageBanner('Welcome aboard! Your journey begins now.', 5000);
+            // Get the CSRF token
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('occupation', occupation);
+            formData.append('timezone', timezone);
+            formData.append('color', color);
+            
+            // Send AJAX request
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+              if (response.redirected) {
+                  // If the server sent a redirect, follow it
+                  window.location.href = response.url;
+              } else {
+                  // Handle non-redirect responses here
+                  return response.text();
+              }
+          })
+            
+        });
+
+        // Animate form elements on load
+        window.addEventListener('load', function() {
+            const formElements = document.querySelectorAll('form > div, form > button');
+            formElements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('animate-in');
+                }, index * 100);
+            });
+        });
+
+        // Update theme color based on color picker
+        document.getElementById('color').addEventListener('input', function(e) {
+            document.documentElement.style.setProperty('--bs-primary', e.target.value);
+            document.querySelector('.btn-primary').style.backgroundColor = e.target.value;
+            document.querySelector('.btn-primary').style.borderColor = e.target.value;
+        });
+    </script>
+</body>
+</html>

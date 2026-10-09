@@ -1,0 +1,515 @@
+{% extends 'new_writing_layout.html' %}
+{% load static %}
+{% block head %}
+<!-- Additional head specific to writing.html -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<style>
+	.btn-with-spinner {
+			position: relative;
+			padding-left: 40px; /* Make space for the spinner */
+	}
+	.spinner {
+			top: 50%;
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-top: 3px solid #000;
+			border-radius: 50%;
+			margin-left: 10px;
+			animation: spin 1s linear infinite;
+			display: none;
+	}
+	@keyframes spin {
+			0% { transform: translateY(-50%) rotate(0deg); }
+			100% { transform: translateY(-50%) rotate(360deg); }
+	}
+  #messages-container {
+    max-width: 300px;
+  }
+  
+  .custom-alert {
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="messages-container" style="position: fixed; top: 60px; right: 20px; z-index: 1050;"></div>
+<div class="row row-deck row-cards mt-5">
+	<div class="col-12">
+	  <div class="card card-md">
+		<div class="card-stamp card-stamp-lg">
+		  <div class="card-stamp-icon bg-primary">
+			<!-- Download SVG icon from http://tabler-icons.io/i/ghost -->
+
+		  </div>
+		</div>
+		<div class="card-body">
+		  <div class="row align-items-center">
+			<div class="col-10">
+			  <h3 class="h1" id="readingTitle">Today's reading</h3>
+			  <div class="markdown text-muted">
+				  Please higlight the important fragments on the left, and take notes on the right box. Be sure to include the most concise and important information.
+			  </div>
+			  
+			</div>
+			<div class = "col-2">
+        <form method="post" id="mainform" >
+            {% csrf_token %}
+            <input type="hidden" name="content" id="highlightedText">
+            <input type="hidden" id="yellowHighlights" name="yellowHighlights">
+            <input type="hidden" id="pinkHighlights" name="pinkHighlights">
+            <input type="hidden" id="hiddenInput" name="notes">
+            <input type="hidden" name="submit_notes">		
+          <input type="submit" id="startQuestions" class="btn btn-primary" name="submit_notes" value="Start questions" onclick="showSpinner()" style="border: 2px solid black; background-color: white; color: black;"> 
+          <span class="spinner"></span>	
+        </form> 
+        <form id="feedbackForm" method="post" style="margin-top: 10px;">
+          {%csrf_token%}
+          <label for="feedback">Feedback:</label>
+          <button id="positiveFeedback"type="button" class="btn btn-outline-success" onclick="submitFeedback('positive')" style="font-size: 1em; color: black; padding: 0.25rem 0.5rem;">
+              &#128077;
+          </button>
+          <button id="negativeFeedback" type="button" class="btn btn-outline-danger" onclick="submitFeedback('negative')" style="font-size: 1em; color: black; padding: 0.25rem 0.5rem;">
+              &#128078;
+          </button>
+          <input type="hidden" name="feedback" id="feedbackInput">
+      </form>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	<div class="col-md-12 col-lg-8 mt-4">
+	  <div class="card">
+		<div class="card-header d-flex justify-content-between align-items-center">
+		  <h3 class="card-title">{{title}}    </h3>
+		  <div>
+			  
+		  {%if not review %}<button id="yellowHighlight" class="btn btn-primary" onclick="changeHighlightColor('yellow')" style="border: 2px solid black; background-color: white; color: black;">Highlight Notes</button>
+		  <button id="pinkHighlight" class="btn btn-primary" onclick="changeHighlightColor('pink')" style="border: 2px solid black; background-color: white; color: black;">Highlight Unknown Words</button> {%endif %}
+		  </div>
+		</div>
+		<div class="card-body" id="contentToHighlight">
+		  {% for paragraph in text %}
+			  <p style="font-size: 1.2em; color: black;">{{ paragraph }}</p>
+		  {% endfor %}
+	  </div>
+	  </div>
+	</div>
+	<div class="col-md-6 col-lg-4 mt-4">
+		<div class="card d-flex flex-column" style="min-height: 450px;">
+			<div class="card-header">
+				<h3 class="card-title">Any Notes?</h3>
+			</div>
+			<div class="card-body d-flex flex-column p-0">
+				<textarea placeholder="Enter your notes here..." {%if review%} disabled  {%endif%} id="textArea" style="flex-grow: 1; width: 100%; border: none; padding: 1rem;">{%if review%} {{ notes }}{%endif%}</textarea>
+			</div>
+			<div class="card-footer mt-auto">
+				<a>Notes are saved automatically</a>
+				<div class="dropdown mt-2">
+					<button id="teacherQuestions" class="btn btn-primary dropdown-toggle" type="button" {%if review%}disabled {%endif%} id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 2px solid black; background-color: white; color: black;">
+						Questions? Ask your teacher!
+					</button>
+					<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" aria-labelledby="dropdownMenuButton">
+						<form class="dropdown-item px-4 py-3" method="post">
+							{% csrf_token %}
+							<div class="form-group">
+								<label for="questionInput">Your Question</label>
+								<input type="text" class="form-control" id="questionInput" placeholder="Enter your question here..." name="question">
+							</div>
+							<button type="submit" class="btn btn-primary" name="teacher_question">Submit</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+
+	
+	
+  
+  
+  </div>
+  <div class="row row-deck row-cards">
+	  
+	</div>
+	</div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.djangoData = {
+      lastCourseId: "{{ course_id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script>
+  function submitFeedback(feedback) {
+    // Get the feedback form
+    const form = document.getElementById('feedbackForm');
+    
+    // Update the hidden input with the feedback value
+    const feedbackInput = document.getElementById('feedbackInput');
+    feedbackInput.value = feedback;
+    
+    // Submit the form
+    form.submit();
+    
+    // Optionally, you can disable the buttons after submission
+    const buttons = form.getElementsByTagName('button');
+    for (let button of buttons) {
+        button.disabled = true;
+    }
+}
+</script>
+<script>
+	var review = {{ review|lower }};
+	var pink_highlights = "{{ pink_highlights }}";
+	var yellow_highlights = "{{ yellow_highlights  }}";
+</script>
+<script>
+	$(document).ready(function() {
+    let highlightedTexts = { yellow: [], pink: [] };
+    let highlightId = 0;
+    let currentHighlightColor = 'yellow';
+
+    function loadHighlights() {
+			// Function to decode base64 to JSON
+			function decodeHighlights(encodedString) {
+					try {
+							return JSON.parse(atob(encodedString));
+					} catch (e) {
+							console.error('Error decoding highlights:', e);
+							return [];
+					}
+			}
+	
+			// Check if we're in review mode
+			if (typeof review !== 'undefined' && review === true) {
+					console.log('Loading highlights from Django template variables');
+					if (typeof pink_highlights !== 'undefined' && pink_highlights) {
+							let pinkData = decodeHighlights(pink_highlights);
+							highlightedTexts.pink = pinkData.map((h, index) => ({
+									id: index,
+									text: h.text,
+									color: 'pink',
+									startIndex: h.startIndex,
+									endIndex: h.endIndex
+							}));
+					}
+					if (typeof yellow_highlights !== 'undefined' && yellow_highlights) {
+							let yellowData = decodeHighlights(yellow_highlights);
+							highlightedTexts.yellow = yellowData.map((h, index) => ({
+									id: index + highlightedTexts.pink.length, // Ensure unique IDs
+									text: h.text,
+									color: 'yellow',
+									startIndex: h.startIndex,
+									endIndex: h.endIndex
+							}));
+					}
+					// Set highlightId to the maximum id from both arrays + 1
+					highlightId = Math.max(
+							...highlightedTexts.pink.map(h => h.id),
+							...highlightedTexts.yellow.map(h => h.id),
+							-1
+					) + 1;
+			} else {
+            const savedHighlights = localStorage.getItem('savedHighlights');
+            const savedHighlightId = localStorage.getItem('lastHighlightId');
+            console.log('Loading highlights from localStorage:', savedHighlights, savedHighlightId);
+            if (savedHighlights && savedHighlightId) {
+                highlightedTexts = JSON.parse(savedHighlights);
+                highlightId = parseInt(savedHighlightId);
+            } else {
+                console.log('No saved highlights found');
+            }
+					}
+					console.log('Loaded highlights:', highlightedTexts, highlightId);
+					applyHighlights();
+			}
+
+			function applyHighlights() {
+				const content = $('#contentToHighlight');
+				console.log('Applying highlights:', highlightedTexts);
+		
+				Object.keys(highlightedTexts).forEach(color => {
+						highlightedTexts[color].forEach(highlight => {
+								const range = document.createRange();
+								const startNode = findNodeAtIndex(content[0], highlight.startIndex);
+								const endNode = findNodeAtIndex(content[0], highlight.endIndex);
+								
+								if (startNode && endNode) {
+										range.setStart(startNode.node, startNode.offset);
+										range.setEnd(endNode.node, endNode.offset);
+										
+										highlightRange(range, color, highlight.id);
+								}
+						});
+				});
+		}
+		
+		function highlightRange(range, color, id) {
+				if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+						const span = document.createElement('span');
+						span.className = `highlighted-${color}`;
+						span.setAttribute('data-highlight-id', id);
+						span.setAttribute('data-highlight-color', color);
+						range.surroundContents(span);
+				} else {
+						const textNodes = getTextNodesInRange(range);
+						textNodes.forEach((node, index) => {
+								const nodeRange = document.createRange();
+								nodeRange.selectNodeContents(node);
+								
+								if (index === 0) {
+										nodeRange.setStart(node, range.startOffset);
+								}
+								if (index === textNodes.length - 1) {
+										nodeRange.setEnd(node, range.endOffset);
+								}
+								
+								const span = document.createElement('span');
+								span.className = `highlighted-${color}`;
+								span.setAttribute('data-highlight-id', id);
+								span.setAttribute('data-highlight-color', color);
+								nodeRange.surroundContents(span);
+						});
+				}
+		}
+		
+		function getTextNodesInRange(range) {
+				let textNodes = [];
+				const walker = document.createTreeWalker(
+						range.commonAncestorContainer,
+						NodeFilter.SHOW_TEXT,
+						null,
+						false
+				);
+		
+				let node;
+				while (node = walker.nextNode()) {
+						if (range.intersectsNode(node)) {
+								textNodes.push(node);
+						}
+				}
+		
+				return textNodes;
+		}
+
+    function findNodeAtIndex(rootNode, targetIndex) {
+        let currentIndex = 0;
+        
+        function traverse(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (currentIndex + node.length > targetIndex) {
+                    return { node: node, offset: targetIndex - currentIndex };
+                }
+                currentIndex += node.length;
+            } else {
+                for (let child of node.childNodes) {
+                    const result = traverse(child);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+        
+        return traverse(rootNode);
+    }
+
+    function saveHighlights() {
+        localStorage.setItem('savedHighlights', JSON.stringify(highlightedTexts));
+        localStorage.setItem('lastHighlightId', highlightId.toString());
+        console.log('Saved highlights:', highlightedTexts, highlightId);
+    }
+
+    if (!review) {
+        $(document).on('mouseup', function(e) {
+            if (window.getSelection) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && selection.toString().trim() !== '') {
+                    const range = selection.getRangeAt(0);
+                    const container = $('#contentToHighlight')[0];
+                    if (container.contains(range.commonAncestorContainer)) {
+                        if (!range.collapsed) {
+                            const selectedText = selection.toString();
+                            const startIndex = getTextNodeOffset(container, range.startContainer) + range.startOffset;
+                            const endIndex = startIndex + selectedText.length;
+                            
+                            const span = document.createElement('span');
+                            span.className = `highlighted-${currentHighlightColor}`;
+                            span.setAttribute('data-highlight-id', highlightId);
+                            span.setAttribute('data-highlight-color', currentHighlightColor);
+                            range.surroundContents(span);
+                            
+                            highlightedTexts[currentHighlightColor].push({
+                                id: highlightId,
+                                text: selectedText,
+                                color: currentHighlightColor,
+                                startIndex: startIndex,
+                                endIndex: endIndex
+                            });
+                            highlightId++;
+                            
+                            updateHiddenInput();
+                            saveHighlights();
+                            console.log('New highlight added:', highlightedTexts);
+                        }
+                    }
+                }
+            }
+            window.getSelection().removeAllRanges();
+        });
+    }
+
+    function getTextNodeOffset(rootNode, targetNode) {
+        let offset = 0;
+        
+        function traverse(node) {
+            if (node === targetNode) {
+                return true;
+            }
+            
+            if (node.nodeType === Node.TEXT_NODE) {
+                offset += node.length;
+            } else {
+                for (let child of node.childNodes) {
+                    if (traverse(child)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        traverse(rootNode);
+        return offset;
+    }
+
+    function updateHiddenInput() {
+        $('#yellowHighlights').val(JSON.stringify(highlightedTexts.yellow.map(h => ({text: h.text, startIndex: h.startIndex, endIndex: h.endIndex}))));
+        $('#pinkHighlights').val(JSON.stringify(highlightedTexts.pink.map(h => ({text: h.text, startIndex: h.startIndex, endIndex: h.endIndex}))));
+    }
+		{%if not review %}
+    $(document).on('click', '.highlighted-yellow, .highlighted-pink', function() {
+        const highlightId = parseInt($(this).data('highlight-id'));
+        const highlightColor = $(this).data('highlight-color');
+        highlightedTexts[highlightColor] = highlightedTexts[highlightColor].filter(h => h.id !== highlightId);
+        $(this).contents().unwrap();
+        
+        updateHiddenInput();
+        saveHighlights();
+        console.log('Highlight removed:', highlightedTexts);
+    });
+		{%endif %}
+    window.changeHighlightColor = function(color) {
+        currentHighlightColor = color;
+    };
+
+    // Load highlights when the page is ready
+    loadHighlights();
+});
+
+// Text area and hidden input synchronization
+document.addEventListener('DOMContentLoaded', function () {
+    var textArea = document.getElementById('textArea');
+    var hiddenInput = document.getElementById('hiddenInput');
+    function disableMouseUpInsideTextArea() {
+        document.getElementById('textArea').addEventListener('mouseup', function(event) {
+            event.stopPropagation();
+        }, true);
+        document.getElementById('questionInput').addEventListener('mouseup', function(event) {
+            event.stopPropagation();
+        }, true);
+    }
+    disableMouseUpInsideTextArea();	
+    textArea.addEventListener('input', function () {
+        hiddenInput.value = textArea.value;
+    });
+});
+
+// Form submission and spinner
+function showSpinner() {
+    var messageContainer = document.getElementById('messages-container');
+    var successMessage = document.createElement('div');
+    successMessage.className = 'alert alert-success alert-dismissible fade show custom-alert';
+    successMessage.role = 'alert';
+    successMessage.innerHTML = `
+        <strong>Success!</strong> We are creating your questions. It should be no more than a minute.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    messageContainer.appendChild(successMessage);
+    document.querySelector('.spinner').style.display = 'inline-block';
+    document.getElementById('submitButton').disabled = true;
+    localStorage.clear();
+    document.getElementById('mainform').submit();
+}
+
+// Tab visibility tracking
+let hidden, visibilityChange, visibilityTimer;
+let tabLeftTime = null;
+
+// Set the name of the hidden property and the change event for visibility
+if (typeof document.hidden !== "undefined") {
+    hidden = "hidden";
+    visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden";
+    visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden";
+    visibilityChange = "webkitvisibilitychange";
+}
+
+// Function to get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+// Function to send request to Django endpoint
+function sendTabRequest(action) {
+    fetch('/student/left-page', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            action: action,
+            timestamp: new Date().toISOString(),
+            duration: action === 'tab_returned' && tabLeftTime ? (new Date() - tabLeftTime) / 1000 : null
+        })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch((error) => console.error('Error:', error));
+}
+
+// Function to handle visibility change
+function handleVisibilityChange() {
+    if (document[hidden]) {
+        // The tab has become hidden - start the timer
+        visibilityTimer = setTimeout(() => {
+            sendTabRequest('tab_left');
+            tabLeftTime = new Date();
+        }, 5000);
+    } else {
+        // The tab has become visible
+        clearTimeout(visibilityTimer);
+        if (tabLeftTime) {
+            sendTabRequest('tab_returned');
+            tabLeftTime = null;
+        }
+    }
+}
+
+// Add the event listener for visibility change
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% if messages %}
+{% with request.path as current_path %}
+{% url 'login' as login %}
+{% url 'signup' as signup %}
+{%if current_path == login or current_path == signup%}
+<div class="custom-alert-container">
+        <ul class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{message.tags}} alert-dismissible fade show custom-alert" role="alert">
+                <div class="d-flex">
+                    <div>
+                        {% if message.tags == 'success' %}
+                        <!-- Download SVG icon from http://tabler-icons.io/i/check -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24V0H0z" fill="none"></path><path d="M5 12l5 5l10 -10"></path></svg>
+                        {% elif message.tags == 'danger' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24V0H0z" fill="none"></path>
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                            <path d="M12 8v4"></path>
+                            <path d="M12 16h.01"></path>
+                        </svg>
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24V0H0z" fill="none"></path><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>
+                        {% endif %}
+                    </div>
+                    <div class="alert-text" style="margin-left: 10px; margin-top: 10px">
+                        <h4 class="alert-title">{{ message }}</h4>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+        </ul>
+    </div>
+    </ul>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var alerts = document.querySelectorAll('.alert-dismissible');
+        var alertContainer = document.querySelector('.custom-alert-container');
+
+        alerts.forEach(function(alert) {
+            alert.addEventListener('close.bs.alert', function(event) {
+                event.preventDefault();
+                alertContainer.classList.add('collapsing');
+                setTimeout(function() {
+                    alertContainer.classList.remove('show');
+                    alertContainer.classList.add('d-none');
+                }, 500); // Match the CSS transition duration
+            });
+        });
+    });
+    </script> 
+{%else%}
+<style>
+  .message-container {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      max-width: 300px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+  }
+  .alert { 
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      opacity: 1;
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+  .close-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 10px;
+      float: right;
+  }
+</style>
+
+<div class="message-container" id="messageContainer">
+  
+      {% for message in messages %}
+
+          <div class="alert  alert-dismissible fade show custom-alert alert-{% if message.tags == "error" %}danger{%else%}{{message.tags}}{% endif %}" data-message-id="{{ forloop.counter }}">
+              {{ message }}
+              <button class="close-btn" onclick="removeMessage({{ forloop.counter }})">&times;</button>
+          </div>
+      {% endfor %}
+  
+</div>
+
+<script>
+  function removeMessage(id) {
+      const message = document.querySelector(`[data-message-id="${id}"]`);
+      if (message) {
+          message.style.opacity = '0';
+          message.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+              message.remove();
+              adjustMessagePositions();
+          }, 500);
+      }
+  }
+
+  function adjustMessagePositions() {
+      const messages = document.querySelectorAll('.alert-dismissible');
+      messages.forEach((msg, index) => {
+          msg.style.transition = 'transform 0.5s ease-out';
+          msg.style.transform = `translateY(${index * -10}px)`;
+      });
+  }
+
+  // Auto-hide messages after 5 seconds
+  document.querySelectorAll('.alert-dismissible').forEach((message, index) => {
+      setTimeout(() => removeMessage(message.dataset.messageId), 5000 + index * 1000);
+  });
+</script>
+{%endif%}
+{%endwith%}
+{%endif%}

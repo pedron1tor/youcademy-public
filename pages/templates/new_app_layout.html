@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  {%include "tagmanager1.html" %}
+  <head>
+    <!-- Required Meta Tags Always Come First -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <title>{{title}}</title>
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="shortcut icon" type="image/x-icon">
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="apple-touch-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'oldlibrary/vendor/bootstrap-icons/font/bootstrap-icons.css' %}"/>
+    <link rel="stylesheet" href="{% static 'oldlibrary/vendor/hs-mega-menu/dist/hs-mega-menu.min.css' %}">
+    <link rel="stylesheet" href="{% static 'oldlibrary/vendor/tom-select/dist/css/tom-select.bootstrap5.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro/build/vanilla-calendar.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro/build/vanilla-calendar.min.js" defer></script>
+    <link rel="preload" href="{% static 'oldlibrary/app-assets/theme.min.css' %}" data-hs-appearance="default" as="style"/>
+    <link rel="preload" href="{% static 'oldlibrary/app-assets/theme-dark.min.css' %}" data-hs-appearance="dark" as="style"/>
+    <script src="{% static 'htmx.min.js' %}" defer></script>
+    <style data-hs-appearance-onload-styles>
+      * {
+        transition: unset !important;
+      }
+
+      body {
+        opacity: 0;
+      }
+      
+    </style>
+    <style>
+      .highlighted-yellow {
+        background-color: yellow;
+      }
+  
+      .highlighted-pink {
+        background-color: pink;
+      }
+    </style>
+    <style>
+      .custom-alert {
+          transition: opacity 0.5s ease-out, max-height 0.5s ease-out, margin 0.5s ease-out, padding 0.5s ease-out;
+          overflow: hidden;
+          max-height: 200px; /* Adjust based on your alert height */
+      }
+
+      .custom-alert.collapsing {
+          opacity: 0;
+          max-height: 0;
+          margin: 0;
+          padding: 0;
+      }
+      {%if request.path == "/student/" or request.path == "/student/new_reading/" or  request.path == "/student/learning-path/"%}
+      html, body, * {
+        font-family: 'Lato', sans-serif !important;
+      }
+      {%endif%}
+    </style>
+    <script src="{% static 'oldlibrary/front-dashboard.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'oldlibrary/main.css' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.1.0/introjs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.1.0/intro.min.js"></script>
+    {% block head %} {% endblock %}
+  </head>
+
+  <body>
+    {%include "tagmanager2.html" %}
+    <script src="{% static 'oldlibrary/app-assets/hs.theme-appearance.js' %}"></script>
+    {%if request.path == "/student/" or request.path == "/student/new_reading/" or request.path == "/student/learning-path/" %}
+    {%include "student/student-dashboard-app-header.html"%}
+    {%else%}
+    {% include "app-header.html" %}
+    {%endif%}
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content" role="main" class="main">
+      {%if request.path == "/student/" or request.path == "/student/new_reading/" or request.path == "/student/learning-path/"%}
+      {%else%}
+      {%include "app-sidebar.html"%}
+      {%endif%}
+      <!-- Content -->
+      <div class="content container" style="margin-top: -23rem;">{% block content %} {% endblock %}</div>
+      <!-- End Content -->
+
+      {% include "feedback-form.html" %}
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="row justify-content-between align-items-center">
+          
+        </div>
+        <!-- End Row -->
+      </div>
+      <!-- End Footer -->
+    </main>
+    <!-- ========== END MAIN CONTENT ========== -->
+
+    <!-- ========== SECONDARY CONTENTS ========== -->
+
+    <!-- Activity -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="offcanvasActivityStream"
+      aria-labelledby="offcanvasActivityStreamLabel"
+    >
+      <div class="offcanvas-header">
+        <h4 id="offcanvasActivityStreamLabel" class="mb-0">Activity stream</h4>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Step -->
+        <ul class="step step-icon-sm step-avatar-sm">
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <div class="step-avatar">
+                <img
+                  class="step-avatar"
+                  src="{% static "oldlibrary/assets/img/160x160/img9.jpg" %}"
+                  alt="Image Description"
+                />
+              </div>
+
+              <div class="step-content">
+                <h5 class="mb-1">Iana Robinson</h5>
+
+                <p class="fs-5 mb-1">
+                  Added 2 files to task
+                  <a class="text-uppercase" href="#"
+                    ><i class="bi-journal-bookmark-fill"></i> Fd-7</a
+                  >
+                </p>
+
+                <ul class="list-group list-group-sm">
+                  <!-- List Item -->
+                  <li class="list-group-item list-group-item-light">
+                    <div class="row gx-1">
+                      <div class="col-6">
+                        <!-- Media -->
+                        <div class="d-flex">
+                          <div class="flex-shrink-0">
+                            <img
+                              class="avatar avatar-xs"
+                              src="{% static "oldlibrary/assets/svg/brands/excel-icon.svg" %}"
+                              alt="Image Description"
+                            />
+                          </div>
+                          <div class="flex-grow-1 text-truncate ms-2">
+                            <span
+                              class="d-block fs-6 text-dark text-truncate"
+                              title="weekly-reports.xls"
+                              >weekly-reports.xls</span
+                            >
+                            <span class="d-block small text-muted">12kb</span>
+                          </div>
+                        </div>
+                        <!-- End Media -->
+                      </div>
+                      <!-- End Col -->
+
+                      <div class="col-6">
+                        <!-- Media -->
+                        <div class="d-flex">
+                          <div class="flex-shrink-0">
+                            <img
+                              class="avatar avatar-xs"
+                              src="{% static "oldlibrary/assets/svg/brands/word-icon.svg"%}"
+                              alt="Image Description"
+                            />
+                          </div>
+                          <div class="flex-grow-1 text-truncate ms-2">
+                            <span
+                              class="d-block fs-6 text-dark text-truncate"
+                              title="weekly-reports.xls"
+                              >weekly-reports.xls</span
+                            >
+                            <span class="d-block small text-muted">4kb</span>
+                          </div>
+                        </div>
+                        <!-- End Media -->
+                      </div>
+                      <!-- End Col -->
+                    </div>
+                    <!-- End Row -->
+                  </li>
+                  <!-- End List Item -->
+                </ul>
+
+                <span class="small text-muted text-uppercase">Now</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <span class="step-icon step-icon-soft-dark">B</span>
+
+              <div class="step-content">
+                <h5 class="mb-1">Bob Dean</h5>
+
+                <p class="fs-5 mb-1">
+                  Marked
+                  <a class="text-uppercase" href="#"
+                    ><i class="bi-journal-bookmark-fill"></i> Fr-6</a
+                  >
+                  as
+                  <span class="badge bg-soft-success text-success rounded-pill"
+                    ><span class="legend-indicator bg-success"></span
+                    >"Completed"</span
+                  >
+                </p>
+
+                <span class="small text-muted text-uppercase">Today</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <div class="step-avatar">
+                <img
+                  class="step-avatar-img"
+                  src="{% static "oldlibrary/assets/img/160x160/img3.jpg" %}"
+                  alt="Image Description"
+                />
+              </div>
+
+              <div class="step-content">
+                <h5 class="h5 mb-1">Crane</h5>
+
+                <p class="fs-5 mb-1">
+                  Added 5 card to <a href="#">Payments</a>
+                </p>
+
+                <ul class="list-group list-group-sm">
+                  <li class="list-group-item list-group-item-light">
+                    <div class="row gx-1">
+                      <div class="col">
+                        <img
+                          class="img-fluid rounded"
+                          src="{% static "oldlibrary/assets/svg/components/card-1.svg"%}"
+                          alt="Image Description"
+                        />
+                      </div>
+                      <div class="col">
+                        <img
+                          class="img-fluid rounded"
+                          src="{% static "oldlibrary/assets/svg/components/card-2.svg"%}"
+                          alt="Image Description"
+                        />
+                      </div>
+                      <div class="col">
+                        <img
+                          class="img-fluid rounded"
+                          src="{% static "oldlibrary/assets/svg/components/card-3.svg"%}"
+                          alt="Image Description"
+                        />
+                      </div>
+                      <div class="col-auto align-self-center">
+                        <div class="text-center">
+                          <a href="#">+2</a>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+
+                <span class="small text-muted text-uppercase">May 12</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <span class="step-icon step-icon-soft-info">D</span>
+
+              <div class="step-content">
+                <h5 class="mb-1">David Lidell</h5>
+
+                <p class="fs-5 mb-1">Added a new member to Front Dashboard</p>
+
+                <span class="small text-muted text-uppercase">May 15</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <div class="step-avatar">
+                <img
+                  class="step-avatar-img"
+                  src="{% static "oldlibrary/assets/img/160x160/img7.jpg" %}"
+                  alt="Image Description"
+                />
+              </div>
+
+              <div class="step-content">
+                <h5 class="mb-1">Rachel King</h5>
+
+                <p class="fs-5 mb-1">
+                  Marked
+                  <a class="text-uppercase" href="#"
+                    ><i class="bi-journal-bookmark-fill"></i> Fr-3</a
+                  >
+                  as
+                  <span class="badge bg-soft-success text-success rounded-pill"
+                    ><span class="legend-indicator bg-success"></span
+                    >"Completed"</span
+                  >
+                </p>
+
+                <span class="small text-muted text-uppercase">Apr 29</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <div class="step-avatar">
+                <img
+                  class="step-avatar-img"
+                  src="{% static "oldlibrary/assets/img/160x160/img5.jpg"%}"
+                  alt="Image Description"
+                />
+              </div>
+
+              <div class="step-content">
+                <h5 class="mb-1">Finch Hoot</h5>
+
+                <p class="fs-5 mb-1">
+                  Earned a "Top endorsed"
+                  <i class="bi-patch-check-fill text-primary"></i> badge
+                </p>
+
+                <span class="small text-muted text-uppercase">Apr 06</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+
+          <!-- Step Item -->
+          <li class="step-item">
+            <div class="step-content-wrapper">
+              <span class="step-icon step-icon-soft-primary">
+                <i class="bi-person-fill"></i>
+              </span>
+
+              <div class="step-content">
+                <h5 class="mb-1">Project status updated</h5>
+
+                <p class="fs-5 mb-1">
+                  Marked
+                  <a class="text-uppercase" href="#"
+                    ><i class="bi-journal-bookmark-fill"></i> Fr-3</a
+                  >
+                  as
+                  <span class="badge bg-soft-primary text-primary rounded-pill"
+                    ><span class="legend-indicator bg-primary"></span>"In
+                    progress"</span
+                  >
+                </p>
+
+                <span class="small text-muted text-uppercase">Feb 10</span>
+              </div>
+            </div>
+          </li>
+          <!-- End Step Item -->
+        </ul>
+        <!-- End Step -->
+
+        <div class="d-grid">
+          <a class="btn btn-white" href="javascript:;"
+            >View all <i class="bi-chevron-right"></i
+          ></a>
+        </div>
+      </div>
+    </div>
+    <!-- End Activity -->
+
+    <!-- ========== END SECONDARY CONTENTS ========== -->
+    <script src="{% static 'oldlibrary/app-assets/jquery.min.js' %}"></script>
+    <script src="{% static 'oldlibrary/app-assets/jquery-migrate.min.js' %}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const goBackLink = document.getElementById('goBackLink');
+        goBackLink.href = "{{go_back_url}}" ; // Fallback to JavaScript history method if no referrer is available
+      });
+    </script>
+    {% block scripts %} {% endblock %}
+
+    
+<script src="{% static 'oldlibrary/bootstrap.bundle.min.js' %}"></script>
+
+<!-- JS Implementing Plugins -->
+<script src="{% static 'oldlibrary/app-assets/hs-navbar-vertical-aside.min.js' %}"></script>
+<script src="{% static 'oldlibrary/app-assets/hs-form-search.min.js' %}"></script>
+
+<!-- JS Front -->
+<script src="{% static 'oldlibrary/app-assets/theme.min.js' %}"></script>
+    <!-- JS Plugins Init. -->
+    <script>
+      (function () {
+        // INITIALIZATION OF NAVBAR VERTICAL ASIDE
+        // =======================================================
+        new HSSideNav(".js-navbar-vertical-aside").init();
+
+        // INITIALIZATION OF BOOTSTRAP DROPDOWN
+        // =======================================================
+        HSBsDropdown.init();
+
+        // INITIALIZATION OF FORM SEARCH
+        // =======================================================
+        new HSFormSearch(".js-form-search");
+      })();
+    </script>
+
+    <!-- Style Switcher JS -->
+
+    <script>
+      (function () {
+        // STYLE SWITCHER
+        // =======================================================
+        const $dropdownBtn = document.getElementById("selectThemeDropdown"); // Dropdowon trigger
+        const $variants = document.querySelectorAll(
+          `[aria-labelledby="selectThemeDropdown"] [data-icon]`
+        ); // All items of the dropdown
+
+        // Function to set active style in the dorpdown menu and set icon for dropdown trigger
+        const setActiveStyle = function () {
+          $variants.forEach(($item) => {
+            if (
+              $item.getAttribute("data-value") ===
+              HSThemeAppearance.getOriginalAppearance()
+            ) {
+              $dropdownBtn.innerHTML = `<i class="${$item.getAttribute(
+                "data-icon"
+              )}" />`;
+              return $item.classList.add("active");
+            }
+
+            $item.classList.remove("active");
+          });
+        };
+
+        // Add a click event to all items of the dropdown to set the style
+        $variants.forEach(function ($item) {
+          $item.addEventListener("click", function () {
+            HSThemeAppearance.setAppearance($item.getAttribute("data-value"));
+          });
+        });
+
+        // Call the setActiveStyle on load page
+        setActiveStyle();
+
+        // Add event listener on change style to call the setActiveStyle function
+        window.addEventListener("on-hs-appearance-change", function () {
+          setActiveStyle();
+        });
+      })();
+    </script>
+
+    <!-- End Style Switcher JS -->
+  </body>
+</html>

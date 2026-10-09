@@ -1,0 +1,941 @@
+{% extends 'new_writing_layout.html' %}
+{% load static %}
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+	input[type="radio"]:disabled + label {
+    color: inherit !important; /* Keeps the text color normal */
+    cursor: default !important;
+    opacity: 1 !important;
+}
+#messages-container {
+  max-width: 300px;
+}
+
+.custom-alert {
+  margin-bottom: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+</style>
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: auto repeat(7, 1fr);
+    gap: 1px;
+    background-color: #e0e0e0;
+  } 
+  .schedule-grid > div {
+    background-color: #ffffff;
+    padding: 0.5rem;
+    min-height: 2rem;
+  }
+  .schedule-header {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0 !important;
+  }
+
+  .course-table th:last-child,
+  .course-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+  }
+  .course-table td {
+    vertical-align: middle;
+  }
+  .course-action {
+    display: flex;
+    justify-content: flex-end;
+  }
+.streak-card:first-child {
+    margin-bottom: 1rem;
+}
+.task-list {
+  text-align: right;
+}
+
+
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+.task-list {
+  flex-grow: 1;
+  text-align: right;
+}
+.button-container {
+  display: flex;
+  align-items: flex-end;
+  padding-left: 1rem;
+}
+.streak-card {
+  height: calc(50% - 0.5rem);
+}
+.streak-card:first-child {
+  margin-bottom: 1rem;
+}
+
+#streak-counter {
+  font-weight: bold;
+}
+.hover-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+.btn-wrapper:hover .hover-menu {
+  display: block;
+}
+a.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+<div id="messages-container" style="position: fixed; top: 60px; right: 20px; z-index: 1050;"></div>
+<div class="row row-deck row-cards">
+	<div class="col-12">
+	  <div class="card card-md">
+		
+		<div class="card-body">
+			<div class="row align-items-center">
+			  <div class="col-12">
+				<div class="row">
+          <div class="col-1">
+            <form id="feedbackForm" method="post" style="margin-top: -10px;">
+              {%csrf_token%}
+              <label for="feedback">Feedback:</label>
+              <button type="button" class="btn btn-outline-success" onclick="submitFeedback('positive')" style="font-size: 1em; color: black; padding: 0.25rem 0.5rem;">
+                  &#128077;
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="submitFeedback('negative')" style="font-size: 1em; color: black; padding: 0.25rem 0.5rem;">
+                  &#128078;
+              </button>
+              <input type="hidden" name="feedback" id="feedbackInput">
+          </form>
+          </div>
+          <div class="col-8 mb-0 mx-auto">
+            <form class="js-step-form" method="post" 
+                  data-hs-step-form-options='{
+                    "progressSelector": "#basicStepFormProgress",
+                    "stepsSelector": "#basicStepFormContent",
+                    "endSelector": "#createProjectFinishBtn"
+                  }'>
+              {% csrf_token %}
+              <!-- Hidden input to hold the question number -->
+              <input type="hidden" name="change_question" id="question_num" value="">
+              
+              <!-- Navigation container -->
+              <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <!-- Previous button -->
+                {% if not first_question %}
+                  <button style="border-radius: 4px; border: 2px solid black; background-color: white; color: black; padding: 5px 10px; cursor: pointer;" onclick="prevQuestion('{{question_num}}')">Previous</button>
+                {% else %}
+                  <div style="width: 70px;"></div>
+                {% endif %}
+          
+                <!-- Step -->
+                <ul id="basicStepFormProgress" class="js-step-progress step step-sm step-icon-sm step-inline step-item-between mb-2" style="flex-grow: 1; margin: 0 10px;">
+                  <!-- Loop through questions and render each step item -->
+                  {% for question_iter in questions %}
+                  <li class="step-item">
+                    <a id="question_{{forloop.counter}}" class="step-content-wrapper" href="javascript:;" onclick="handleNavigation('{{question_iter.question_num}}')" style="color: black;">
+                      <span class="step-icon {% if question_iter.question_num == question.question_num %}step-icon-dark{% endif %}" style="border: 2px solid black; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; {% if question_iter.question_num == question.question_num %}background-color: black; color: white;{% endif %}">
+                        {{question_iter.question_num}}
+                      </span>
+                      <div class="step-content"></div>
+                    </a>
+                  </li>
+                  {% endfor %}
+                </ul>
+          
+                <!-- Next button -->
+                {% if not last_question %}
+                  <button style="border-radius: 4px; border: 2px solid black; background-color: white; color: black; padding: 5px 10px; cursor: pointer;" onclick="nextQuestion('{{question_num}}')">Next</button>
+                {% else %}
+                  <div style="width: 70px;"></div>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+				<div class="col-1">
+					{% if last_question %}
+					
+						<input type="submit" class="btn btn-primary" name="submit_quiz" 
+						value="{%if review%}Home{%else%}Submit{%endif%}" name="submit" onclick="submitQuiz()" id="submitquiz" style="border: 2px solid black; background-color: white; color: black;">
+					
+					{% endif %}
+				</div>
+			</div>
+				
+				<div class="markdown mt-2" style="font-size: 1.3em; color: black;">
+					<b id="questionBold">{{question.question}}</b>
+				  </div>
+				  <div class="mt-3">
+				  {% if question.type == "multiple" %}
+				  {% for option in question.answers %}
+				  <div class="form-check">
+					  <input class="form-check-input" type="radio"
+						  name="forminput"
+							
+						  id="option_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
+							{%if review%}disabled {% if forloop.counter == user_answer %}checked{% endif %}{%endif%}
+						  value="{{ option }}" style="border: 2px solid black; appearance: auto;" required>
+					  	<label class="form-check-label" for="option_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+								{% if review %}
+										{% if correct_answer == forloop.counter %}
+												<b>{{ option }}</b>
+										{% else %}
+												{{ option }}
+										{% endif %}
+										
+										{% if correct_answer == forloop.counter and user_answer == forloop.counter %}
+												<img src="{% static 'greentick.svg' %}" style="height: 20px; width: 20px; margin-top: -4px;">
+										{% elif user_answer == forloop.counter %}
+												<img src="{% static 'redx.svg' %}" style="height: 15px; width: 15px; margin-top: -4px;">
+										{% endif %}
+								{% else %}
+										{{ option }}
+								{% endif %}
+						</label>
+						</div>
+				  {% endfor %}
+				  {% elif question.type == "open" %}
+				  <textarea class="form-control"
+					  name="forminput"
+						{%if review%}disabled{%endif%}
+					  id="question_{{ forloop.counter }}_textarea" rows="3">{%if review%}{{user_answer}}{%endif%}</textarea>
+				  {% elif question.type == "highlight" %}
+				  <p>This is a highlight question, please highlight the text in the passage that answers the question.</p>
+				  {% endif %}  
+				</div>
+				{% if review %}
+    {% if question.type == "highlight" or question.type == "open" %}
+								<h4>Feedback</h4>
+								<div class="feedback-container">
+										{% for feedback in feedback_list %}
+												<div class="feedback-item">
+														<b>{{ feedback.type }}</b> {{ feedback.message }}
+												</div>
+										{% endfor %}
+								</div>
+								{% if teacher %}
+                <div class="teacher-feedback" style="display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin-top: 10px;">
+                  <textarea 
+                    name="feedbackinput"
+                    placeholder="Teacher Feedback..." 
+                    style="flex-grow: 1; 
+                           height: 40px; 
+                           resize: horizontal; 
+                           padding: 5px; 
+                           font-size: 14px; 
+                           margin-right: 20px;"
+                    id="teacherFeedbackTextarea"
+                  ></textarea>
+                  <div style="display: flex; align-items: center; white-space: nowrap;">
+                    <label for="myIntegerInput" style="font-size: 14px; margin-right: 5px;">Grade (0-100):</label>
+                    <input 
+                      type="number" 
+                      id="myIntegerInput" 
+                      name="myIntegerInput"
+                      min="0"
+                      max="100"
+                      step="1"
+                      style="width: 60px; padding: 5px; font-size: 14px;"
+                    >
+                  </div>
+                </div>
+								{% endif %}
+						{% endif %}
+				{% endif %}
+			  </div>
+			</div>
+		  </div>
+		  
+	  </div>
+	</div>
+	<div class="col-md-12 col-lg-8 mt-4">
+	  <div class="card" style="min-height: 550px">
+		<div class="card-header d-flex justify-content-between align-items-center">
+		  <h3 class="card-title">{{title}}    </h3>
+		  <div>
+			{% if question.type == "highlight" %}
+			{%if not review%}	
+			<button class="btn btn-primary"
+				onclick="changeHighlightColor('yellow')" style="border: 2px solid black; background-color: white; color: black;">Highlight Answer</button>
+			{%endif %}
+
+			{% endif %}
+		  </div>
+		</div>
+		<div class="card-body" id="contentToHighlight">
+		  {% if image %}
+			  
+			  <div class="image-container mb-3 d-flex justify-content-center align-items-center" > <!-- Set a specific height for the container -->
+				  <img src="{{ image }}" class="img-fluid" alt="Responsive image" style="height: 30%; width: 30%;">
+			  </div>
+		  {% endif %}
+		  <!-- The text paragraphs will now be outside and below the image container -->
+		  {% for paragraph in text %}
+			  <p style="font-size: 1.2em; color: black;">{{ paragraph }}</p>
+		  {% endfor %}
+	  </div>
+	  </div>
+	</div>
+	<div class="col-md-6 col-lg-4 mt-4">
+		<div class="card d-flex flex-column" style="min-height: 450px;">
+			<div class="card-header">
+				<h3 class="card-title">Any Notes?</h3>
+			</div>
+			<div class="card-body d-flex flex-column p-0">
+
+				<textarea {%if review %}disabled {%endif%}placeholder="Enter your notes here..." id="textArea" style="flex-grow: 1; width: 100%; border: none; padding: 1rem;">{{ prefill_notes }}</textarea>
+			</div>
+			<div class="card-footer mt-auto">
+				<a>Notes are saved automatically</a>
+				<div class="dropdown mt-2">
+					<button class="btn btn-primary dropdown-toggle" {%if review%}disabled{%endif%} style="border: 2px solid black; background-color: white; color: black;" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Questions? Ask your teacher?
+					</button>
+					<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" aria-labelledby="dropdownMenuButton">
+						<form class="dropdown-item px-4 py-3" method="post">
+							{% csrf_token %}
+							<div class="form-group">
+								<label for="questionInput">Your Question</label>
+								<input type="text" class="form-control" id="questionInput" placeholder="Enter your question here..." name="question">
+							</div>
+							<button type="submit" class="btn btn-primary" name="teacher_question">Submit</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+
+	
+	
+  
+  
+  </div>
+  <div class="row row-deck row-cards">
+	  
+	</div>
+	</div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.djangoData = {
+      lastCourseId: "{{ course_id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script src="{% static 'oldlibrary/vendor/hs-step-form/dist/hs-step-form.min.js' %}"></script>
+<script>
+  function submitFeedback(feedback) {
+    // Get the feedback form
+    const form = document.getElementById('feedbackForm');
+    
+    // Update the hidden input with the feedback value
+    const feedbackInput = document.getElementById('feedbackInput');
+    feedbackInput.value = feedback;
+    
+    // Submit the form
+    form.submit();
+    
+    // Optionally, you can disable the buttons after submission
+    const buttons = form.getElementsByTagName('button');
+    for (let button of buttons) {
+        button.disabled = true;
+    }
+}
+</script>
+<script>
+	var review = {{ review|lower }};
+	var yellow_highlights = "{{ yellow_highlights }}";
+	console.log(yellow_highlights);
+</script>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+    const textArea = document.getElementById('textArea');
+    
+    // Load saved notes from localStorage if available
+    const savedNotes = localStorage.getItem('shared_notes');
+    if (savedNotes) {
+        textArea.value = savedNotes;
+    } else {
+        textArea.value = "{{ prefill_notes|escapejs }}";
+    }
+
+    // Save notes to localStorage whenever the textarea content changes
+    textArea.addEventListener('input', function() {
+        localStorage.setItem('shared_notes', textArea.value);
+    });
+		{%if not review %}
+    loadSavedResponse({{ question.question_num }});
+		{%else %}
+		loadTeacherResponse({{question.question_num}});
+		{%endif%}
+});
+
+function handleNavigation(questionId) {
+	event.preventDefault();  // Stop the form from submitting normally
+	saveCurrentResponse({{ question.question_num }});
+	{%if teacher %}
+	saveTeacherResponse({{question.question_num}});
+	const teacherFeedbackTextarea = document.getElementById('teacherFeedbackTextarea');
+  if (teacherFeedbackTextarea) {
+    localStorage.setItem('teacher_feedback_{{ question.question_num }}', teacherFeedbackTextarea.value);
+  }
+	{%endif%}
+	let newUrl;
+	if (window.location.pathname.startsWith('/teacher/')) {
+			newUrl = `/teacher/class/questions-view/${questionId}`;
+	} else {
+			newUrl = `/student/questions/${questionId}`;
+	}
+	
+	window.location.href = newUrl;  
+}
+function prevQuestion(questionId) {
+  event.preventDefault();  // Stop the form from submitting normally
+	saveCurrentResponse({{ question.question_num }});
+	{%if teacher %}
+	saveTeacherResponse({{question.question_num}});
+	const teacherFeedbackTextarea = document.getElementById('teacherFeedbackTextarea');
+  if (teacherFeedbackTextarea) {
+    localStorage.setItem('teacher_feedback_{{ question.question_num }}', teacherFeedbackTextarea.value);
+  }
+	{%endif%}
+	let newUrl;
+	if (window.location.pathname.startsWith('/teacher/')) {
+			newUrl = `/teacher/class/questions-view/${questionId-1}`;
+	} else {
+			newUrl = `/student/questions/${questionId-1}`;
+	}
+	
+	window.location.href = newUrl;  
+}
+function nextQuestion(questionId) {
+  event.preventDefault();  // Stop the form from submitting normally
+	saveCurrentResponse({{ question.question_num }});
+	{% if teacher %}
+	saveTeacherResponse({{question.question_num}});
+	const teacherFeedbackTextarea = document.getElementById('teacherFeedbackTextarea');
+  if (teacherFeedbackTextarea) {
+    localStorage.setItem('teacher_feedback_{{ question.question_num }}', teacherFeedbackTextarea.value);
+  }
+	{%endif%}
+	let newUrl;
+  const qId = parseInt(questionId);
+	if (window.location.pathname.startsWith('/teacher/')) {
+			newUrl = `/teacher/class/questions-view/${qId+1}`;
+	} else {
+			newUrl = `/student/questions/${qId+1}`;
+	}
+	
+	window.location.href = newUrl;  
+}
+function loadTeacherResponse(questionId) {
+  var savedResponse = JSON.parse(localStorage.getItem('question_' + questionId));
+  if (savedResponse) {
+      Object.keys(savedResponse).forEach(function(key) {
+          if (key === 'grade') {
+              // Load the grade
+              var gradeInput = document.getElementById('myIntegerInput');
+              if (gradeInput) {
+                  gradeInput.value = savedResponse[key];
+              }
+          } else {
+              let inputs = document.querySelectorAll('[name="' + key + '"]');
+              inputs.forEach(input => {
+                  if (input.type === 'radio' && input.value === savedResponse[key]) {
+                      input.checked = true;
+                  } else if (input.type === 'textarea') {
+                      input.value = savedResponse[key];
+                  }
+              });
+          }
+      });
+  }
+}
+function saveCurrentResponse(questionId) {
+    var inputs = document.querySelectorAll('[name="forminput"]');
+    var response = {};
+
+    inputs.forEach(input => {
+        if ((input.type === 'radio' && input.checked) || input.type === 'textarea') {
+            response[input.name] = input.value;
+        }
+    });
+
+    localStorage.setItem('question_' + questionId, JSON.stringify(response));
+}
+{%if teacher%}
+function saveTeacherResponse(questionId) {
+    var inputs = document.querySelectorAll('[name="feedbackinput"]');
+    var gradeInput = document.getElementById('myIntegerInput');
+    var response = {};
+
+    inputs.forEach(input => {
+        if ((input.type === 'radio' && input.checked) || input.type === 'textarea') {
+            response[input.name] = input.value;
+        }
+    });
+
+    // Save the grade
+    if (gradeInput) {
+        response['grade'] = gradeInput.value;
+    }
+
+    localStorage.setItem('question_' + questionId, JSON.stringify(response));
+}
+{%endif%}
+
+function loadSavedResponse(questionId) {
+    var savedResponse = JSON.parse(localStorage.getItem('question_' + questionId));
+    if (savedResponse) {
+        Object.keys(savedResponse).forEach(function(key) {
+            let inputs = document.querySelectorAll('[name="' + key + '"]');
+            inputs.forEach(input => {
+                if (input.type === 'radio' && input.value === savedResponse[key]) {
+                    input.checked = true;
+                } else if (input.type === 'textarea') {
+                    input.value = savedResponse[key];
+                }
+            });
+        });
+    }
+}
+
+function submitQuiz() {
+  saveCurrentResponse({{ question.question_num }});
+  {% if teacher %}
+  saveTeacherResponse({{question.question_num}});
+  {% endif %}
+  var responses = {};
+  for (var i = 1; i <= {{ quiz_len }}; i++) {
+      var savedResponse = localStorage.getItem('question_' + i);
+      if (savedResponse) {
+          responses['question_' + i] = JSON.parse(savedResponse);
+      } else {
+          responses['question_' + i] = {};
+      }
+      // Retrieve highlights from local storage
+      var highlights = localStorage.getItem('savedHighlights_' + i);
+      
+      if (highlights) {
+          responses['question_' + i]['highlights'] = JSON.parse(highlights);
+      }
+  }
+  // Create a form and append the responses as hidden inputs
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = ''; // The form action should be your submission URL
+  
+  var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  var csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = 'csrfmiddlewaretoken';
+  csrfInput.value = csrfToken;
+  form.appendChild(csrfInput);
+
+  var responsesInput = document.createElement('input');
+  responsesInput.type = 'hidden';
+  responsesInput.name = 'responses';
+  responsesInput.value = JSON.stringify(responses);
+  form.appendChild(responsesInput);
+
+  var submitQuizInput = document.createElement('input');
+  submitQuizInput.type = 'hidden';
+  submitQuizInput.name = 'submit_quiz';
+  submitQuizInput.value = '1';
+  form.appendChild(submitQuizInput);
+
+  var textAreaContent = document.getElementById('textArea').value;
+  var notesInput = document.createElement('input');
+  notesInput.type = 'hidden';
+  notesInput.name = 'notes';
+  notesInput.value = textAreaContent;
+  form.appendChild(notesInput);
+
+  {% if teacher %}
+  var teacherFeedback = document.getElementById('teacherFeedbackTextarea');
+  if (teacherFeedback) {
+      var feedbackInput = document.createElement('input');
+      feedbackInput.type = 'hidden';
+      feedbackInput.name = 'teacher_feedback';
+      feedbackInput.value = teacherFeedback.value;
+      form.appendChild(feedbackInput);
+  }
+
+  // Add grade data
+  var gradeInput = document.getElementById('myIntegerInput');
+  if (gradeInput) {
+      var gradeFormInput = document.createElement('input');
+      gradeFormInput.type = 'hidden';
+      gradeFormInput.name = 'grade';
+      gradeFormInput.value = gradeInput.value;
+      form.appendChild(gradeFormInput);
+  }
+  {% endif %}
+
+  document.body.appendChild(form);
+  form.submit();
+  var messageContainer = document.getElementById('messages-container');
+    var successMessage = document.createElement('div');
+    successMessage.className = 'alert alert-success alert-dismissible fade show custom-alert';
+    successMessage.role = 'alert';
+    successMessage.innerHTML = `
+        <strong>Success!</strong> You have finished your quiz!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    messageContainer.appendChild(successMessage);
+  localStorage.clear();
+}
+
+
+
+
+{%if question.type == 'highlight'%}
+$(document).ready(function() {
+	let highlightedTexts = { yellow: [], pink: [] };
+	let highlightId = 0;
+	let currentHighlightColor = 'yellow';
+
+	function loadHighlights() {
+		// Function to decode base64 to JSON
+		function decodeHighlights(encodedString) {
+				try {
+						return JSON.parse(atob(encodedString));
+				} catch (e) {
+						console.error('Error decoding highlights:', e);
+						return [];
+				}
+		}
+
+		// Check if we're in review mode
+		if (typeof review !== 'undefined' && review === true) {
+				console.log('Loading highlights from Django template variables');
+				if (typeof pink_highlights !== 'undefined' && pink_highlights) {
+						let pinkData = decodeHighlights(pink_highlights);
+						highlightedTexts.pink = pinkData.map((h, index) => ({
+								id: index,
+								text: h.text,
+								color: 'pink',
+								startIndex: h.startIndex,
+								endIndex: h.endIndex
+						}));
+				}
+				if (typeof yellow_highlights !== 'undefined' && yellow_highlights) {
+						let yellowData = decodeHighlights(yellow_highlights);
+						highlightedTexts.yellow = yellowData.map((h, index) => ({
+								id: index + highlightedTexts.pink.length, // Ensure unique IDs
+								text: h.text,
+								color: 'yellow',
+								startIndex: h.startIndex,
+								endIndex: h.endIndex
+						}));
+				}
+				// Set highlightId to the maximum id from both arrays + 1
+				highlightId = Math.max(
+						...highlightedTexts.pink.map(h => h.id),
+						...highlightedTexts.yellow.map(h => h.id),
+						-1
+				) + 1;
+		} else {
+					const savedHighlights = localStorage.getItem('savedHighlights_{{ question.question_num }}');
+					const savedHighlightId = localStorage.getItem('lastHighlightId');
+					if (savedHighlights && savedHighlightId) {
+							highlightedTexts = JSON.parse(savedHighlights);
+							highlightId = parseInt(savedHighlightId);
+					} else {
+							console.log('No saved highlights found');
+					}
+				}
+				console.log('Loaded highlights:', highlightedTexts, highlightId);
+				applyHighlights();
+		}
+
+		function applyHighlights() {
+			const content = $('#contentToHighlight');
+			console.log('Applying highlights:', highlightedTexts);
+	
+			Object.keys(highlightedTexts).forEach(color => {
+					highlightedTexts[color].forEach(highlight => {
+							const range = document.createRange();
+							const startNode = findNodeAtIndex(content[0], highlight.startIndex);
+							const endNode = findNodeAtIndex(content[0], highlight.endIndex);
+							
+							if (startNode && endNode) {
+									range.setStart(startNode.node, startNode.offset);
+									range.setEnd(endNode.node, endNode.offset);
+									
+									highlightRange(range, color, highlight.id);
+							}
+					});
+			});
+	}
+	
+	function highlightRange(range, color, id) {
+			if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+					const span = document.createElement('span');
+					span.className = `highlighted-${color}`;
+					span.setAttribute('data-highlight-id', id);
+					span.setAttribute('data-highlight-color', color);
+					range.surroundContents(span);
+			} else {
+					const textNodes = getTextNodesInRange(range);
+					textNodes.forEach((node, index) => {
+							const nodeRange = document.createRange();
+							nodeRange.selectNodeContents(node);
+							
+							if (index === 0) {
+									nodeRange.setStart(node, range.startOffset);
+							}
+							if (index === textNodes.length - 1) {
+									nodeRange.setEnd(node, range.endOffset);
+							}
+							
+							const span = document.createElement('span');
+							span.className = `highlighted-${color}`;
+							span.setAttribute('data-highlight-id', id);
+							span.setAttribute('data-highlight-color', color);
+							nodeRange.surroundContents(span);
+					});
+			}
+	}
+	
+	function getTextNodesInRange(range) {
+			let textNodes = [];
+			const walker = document.createTreeWalker(
+					range.commonAncestorContainer,
+					NodeFilter.SHOW_TEXT,
+					null,
+					false
+			);
+	
+			let node;
+			while (node = walker.nextNode()) {
+					if (range.intersectsNode(node)) {
+							textNodes.push(node);
+					}
+			}
+	
+			return textNodes;
+	}
+
+	function findNodeAtIndex(rootNode, targetIndex) {
+			let currentIndex = 0;
+			
+			function traverse(node) {
+					if (node.nodeType === Node.TEXT_NODE) {
+							if (currentIndex + node.length > targetIndex) {
+									return { node: node, offset: targetIndex - currentIndex };
+							}
+							currentIndex += node.length;
+					} else {
+							for (let child of node.childNodes) {
+									const result = traverse(child);
+									if (result) return result;
+							}
+					}
+					return null;
+			}
+			
+			return traverse(rootNode);
+	}
+
+	function saveHighlights() {
+    localStorage.setItem('savedHighlights_{{ question.question_num }}', JSON.stringify(highlightedTexts));
+		localStorage.setItem('lastHighlightId', highlightId.toString());
+    console.log('Saved highlights for question {{ question.question_num }}:', highlightedTexts);
+}
+	if (!review) {
+			$(document).on('mouseup', function(e) {
+					if (window.getSelection) {
+							const selection = window.getSelection();
+							if (selection.rangeCount > 0 && selection.toString().trim() !== '') {
+									const range = selection.getRangeAt(0);
+									const container = $('#contentToHighlight')[0];
+									if (container.contains(range.commonAncestorContainer)) {
+											if (!range.collapsed) {
+													const selectedText = selection.toString();
+													const startIndex = getTextNodeOffset(container, range.startContainer) + range.startOffset;
+													const endIndex = startIndex + selectedText.length;
+													
+													const span = document.createElement('span');
+													span.className = `highlighted-${currentHighlightColor}`;
+													span.setAttribute('data-highlight-id', highlightId);
+													span.setAttribute('data-highlight-color', currentHighlightColor);
+													range.surroundContents(span);
+													
+													highlightedTexts[currentHighlightColor].push({
+															id: highlightId,
+															text: selectedText,
+															color: currentHighlightColor,
+															startIndex: startIndex,
+															endIndex: endIndex
+													});
+													highlightId++;
+													
+													updateHiddenInput();
+													saveHighlights();
+													console.log('New highlight added:', highlightedTexts);
+											}
+									}
+							}
+					}
+					window.getSelection().removeAllRanges();
+			});
+	}
+
+	function getTextNodeOffset(rootNode, targetNode) {
+			let offset = 0;
+			
+			function traverse(node) {
+					if (node === targetNode) {
+							return true;
+					}
+					
+					if (node.nodeType === Node.TEXT_NODE) {
+							offset += node.length;
+					} else {
+							for (let child of node.childNodes) {
+									if (traverse(child)) {
+											return true;
+									}
+							}
+					}
+					return false;
+			}
+			
+			traverse(rootNode);
+			return offset;
+	}
+
+	function updateHiddenInput() {
+			$('#yellowHighlights').val(JSON.stringify(highlightedTexts.yellow.map(h => ({text: h.text, startIndex: h.startIndex, endIndex: h.endIndex}))));
+			$('#pinkHighlights').val(JSON.stringify(highlightedTexts.pink.map(h => ({text: h.text, startIndex: h.startIndex, endIndex: h.endIndex}))));
+	}
+	{%if not review %}
+	$(document).on('click', '.highlighted-yellow, .highlighted-pink', function() {
+			const highlightId = parseInt($(this).data('highlight-id'));
+			const highlightColor = $(this).data('highlight-color');
+			highlightedTexts[highlightColor] = highlightedTexts[highlightColor].filter(h => h.id !== highlightId);
+			$(this).contents().unwrap();
+			
+			updateHiddenInput();
+			saveHighlights();
+			console.log('Highlight removed:', highlightedTexts);
+	});
+	{%endif %}
+	window.changeHighlightColor = function(color) {
+			currentHighlightColor = color;
+	};
+
+	// Load highlights when the page is ready
+	loadHighlights();
+});
+document.addEventListener('DOMContentLoaded', function () {
+	var textArea = document.getElementById('textArea');
+	var hiddenInput = document.getElementById('hiddenInput');
+	function disableMouseUpInsideTextArea() {
+			document.getElementById('textArea').addEventListener('mouseup', function(event) {
+					event.stopPropagation();
+			}, true);
+			document.getElementById('questionInput').addEventListener('mouseup', function(event) {
+					event.stopPropagation();
+			}, true);
+	}
+	disableMouseUpInsideTextArea();	
+	textArea.addEventListener('input', function () {
+			hiddenInput.value = textArea.value;
+	});
+});
+{%endif %}
+{% if not review %}
+// Variables to track visibility state and timer
+let hidden, visibilityChange, visibilityTimer;
+let tabLeftTime = null;
+
+// Set the name of the hidden property and the change event for visibility
+if (typeof document.hidden !== "undefined") {
+    hidden = "hidden";
+    visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden";
+    visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden";
+    visibilityChange = "webkitvisibilitychange";
+}
+
+// Function to get CSRF token from meta tag
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+// Function to send request to Django endpoint
+function sendTabRequest(action) {
+    fetch('/student/left-page', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            action: action,
+            timestamp: new Date().toISOString(),
+            duration: action === 'tab_returned' && tabLeftTime ? (new Date() - tabLeftTime) / 1000 : null
+        })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch((error) => console.error('Error:', error));
+}
+
+// Function to handle visibility change
+function handleVisibilityChange() {
+    if (document[hidden]) {
+        // The tab has become hidden - start the timer
+        visibilityTimer = setTimeout(() => {
+            sendTabRequest('tab_left');
+            tabLeftTime = new Date();
+        }, 5000);
+    } else {
+        // The tab has become visible
+        clearTimeout(visibilityTimer);
+        if (tabLeftTime) {
+            sendTabRequest('tab_returned');
+            tabLeftTime = null;
+        }
+    }
+}
+
+// Add the event listener for visibility change
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
+{% endif %}
+</script>
+{% endblock %}
+
+
+
+
+

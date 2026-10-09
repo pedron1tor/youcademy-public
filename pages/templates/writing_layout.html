@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    {%include "tagmanager1.html" %}
+    <!-- Required Meta Tags Always Come First -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <title>{{title}}</title>
+
+    <!-- Favicon -->
+    <script src="{% static 'htmx.min.js' %}" defer></script>
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="shortcut icon" type="image/x-icon">
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="apple-touch-icon">
+
+    <!-- Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Implementing Plugins -->
+    <link
+      rel="stylesheet"
+      href="{% static 'oldlibrary/vendor/bootstrap-icons/font/bootstrap-icons.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'oldlibrary/vendor/hs-mega-menu/dist/hs-mega-menu.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'oldlibrary/vendor/tom-select/dist/css/tom-select.bootstrap5.css' %}"
+    />
+
+    <link
+      rel="preload"
+      href="{% static 'oldlibrary/app-assets/theme.min.css' %}"
+      data-hs-appearance="default"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="{% static 'oldlibrary/app-assets/theme-dark.min.css' %}"
+      data-hs-appearance="dark"
+      as="style"
+    />
+
+    <style data-hs-appearance-onload-styles>
+      * {
+        transition: unset !important;
+      }
+
+      body {
+        opacity: 0;
+      }
+    </style>
+    <style>
+      .highlighted-yellow {
+        background-color: yellow;
+      }
+
+      .highlighted-pink {
+        background-color: pink;
+      }
+      
+    </style>
+
+    <script src="{% static 'oldlibrary/front-dashboard.js' %}"></script>
+
+    
+    
+    
+
+<link rel="stylesheet" href="{% static 'oldlibrary/main.css' %}"/>
+     {% comment %} TODO fix 404 /static/media/inter-v12-latin-regular.be7cb18dc7caf47cf7e9.woff2 {% endcomment %}
+    <link rel="stylesheet" href="{% static '/react/static/css/main.9efdfdda.css' %}">
+    <link rel="stylesheet" href="{% static '/react2/static/css/main.9a93f8a1.css' %}">
+    <link rel="stylesheet" href="{% static '/react3/static/css/main.fa74fb40.css' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.1.0/introjs.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.1.0/intro.min.js"></script>
+    {% block head %} {% endblock %}
+  </head>
+
+  <body >
+    {%include "tagmanager2.html" %}
+    <script src="{% static 'oldlibrary/app-assets/hs.theme-appearance.js' %}"></script>
+
+    {% include "app-header.html" %}
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content" role="main" class="main">
+      {% include "writing_topbar_plain.html" %}
+      <!-- Content -->
+      <div class="content container" style="margin-top: -25rem;">{% block content %} {% endblock %}</div>
+      <!-- End Content -->
+
+      {% include "feedback-form.html" %}
+
+      <!-- Footer -->
+
+      <!-- End Footer -->
+    </main>
+    <!-- ========== END MAIN CONTENT ========== -->
+
+    <!-- ========== SECONDARY CONTENTS ========== -->
+
+    
+
+    <!-- ========== END SECONDARY CONTENTS ========== -->
+    <script src="{% static 'oldlibrary/app-assets/jquery.min.js' %}"></script>
+    <script src="{% static 'oldlibrary/app-assets/jquery-migrate.min.js' %}"></script>
+    <script src="{% static 'oldlibrary/bootstrap.bundle.min.js' %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const goBackLink = document.getElementById("goBackLink");
+        goBackLink.href = document.referrer || "javascript:history.back()"; // Fallback to JavaScript history method if no referrer is available
+      });
+    </script>
+    {% block scripts %} {% endblock %}
+
+    <!-- JS Implementing Plugins -->
+    <script src="{% static 'oldlibrary/app-assets/hs-navbar-vertical-aside.min.js' %}"></script>
+    <script src="{% static 'oldlibrary/app-assets/hs-form-search.min.js' %}"></script>
+
+    <!-- JS Front -->
+    <script src="{% static 'oldlibrary/app-assets/theme.min.js' %}"></script>
+    <!-- JS Plugins Init. -->
+    <script>
+      (function () {
+        // INITIALIZATION OF NAVBAR VERTICAL ASIDE
+        // =======================================================
+        new HSSideNav(".js-navbar-vertical-aside").init();
+
+        // INITIALIZATION OF BOOTSTRAP DROPDOWN
+        // =======================================================
+        HSBsDropdown.init();
+
+        // INITIALIZATION OF FORM SEARCH
+        // =======================================================
+        new HSFormSearch(".js-form-search");
+      })();
+    </script>
+
+    <!-- Style Switcher JS -->
+
+    <script>
+      (function () {
+        // STYLE SWITCHER
+        // =======================================================
+        const $dropdownBtn = document.getElementById("selectThemeDropdown"); // Dropdowon trigger
+        const $variants = document.querySelectorAll(
+          `[aria-labelledby="selectThemeDropdown"] [data-icon]`
+        ); // All items of the dropdown
+
+        // Function to set active style in the dorpdown menu and set icon for dropdown trigger
+        const setActiveStyle = function () {
+          $variants.forEach(($item) => {
+            if (
+              $item.getAttribute("data-value") ===
+              HSThemeAppearance.getOriginalAppearance()
+            ) {
+              $dropdownBtn.innerHTML = `<i class="${$item.getAttribute(
+                "data-icon"
+              )}" />`;
+              return $item.classList.add("active");
+            }
+
+            $item.classList.remove("active");
+          });
+        };
+
+        // Add a click event to all items of the dropdown to set the style
+        $variants.forEach(function ($item) {
+          $item.addEventListener("click", function () {
+            HSThemeAppearance.setAppearance($item.getAttribute("data-value"));
+          });
+        });
+
+        // Call the setActiveStyle on load page
+        setActiveStyle();
+
+        // Add event listener on change style to call the setActiveStyle function
+        window.addEventListener("on-hs-appearance-change", function () {
+          setActiveStyle();
+        });
+      })();
+    </script>
+
+    <!-- End Style Switcher JS -->
+  </body>
+</html>

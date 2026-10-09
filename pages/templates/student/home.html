@@ -1,0 +1,277 @@
+{% extends 'app_layout.html' %}
+{% load static %}
+{% block head %}
+<!-- Additional head specific to writing.html -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+    .listitem {
+        border: 1px solid #d3d3d3;
+        padding: 8px;
+        margin: 0px 0;
+        cursor: pointer;
+        background-color: #f9f9f9;
+        transition: background-color 0.3s ease;
+    }
+    .listitem:hover {
+        background-color: #e0e0e0;
+    }
+    #suggestions-list {
+        padding: 0; /* Remove default padding */
+        margin: 0; /* Remove default margin */
+        width: 121%; /* Match the width of the input field */
+        list-style-type: none;
+    }
+    .full-width {
+        width: 120%;
+    }
+    .btn-with-spinner {
+        position: relative;
+        padding-left: 40px; /* Make space for the spinner */
+}
+.form-footer {
+    position: relative; /* Make this the positioning context for the spinner */
+}
+.spinner {
+    position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-top: 3px solid #000;
+        border-radius: 50%;
+        margin-left: 10px;
+        animation: spin 1s linear infinite;
+        display: none; /* Initially hidden */
+        top: calc(30% );
+        
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#messages-container {
+  max-width: 300px;
+}
+
+.custom-alert {
+  margin-bottom: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+</style>
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block content %}
+
+<div style="height:385px;">
+</div>
+<div id="messages-container" style="position: fixed; top: 60px; right: 20px; z-index: 1050;"></div>
+<div class="row row-deck row-cards">
+    <div class="col-12">
+        <div class="card card-md">
+            <div class="card-header">
+                <h2>Please query today's reading</h2>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-10">
+                        <div class="markdown text-muted">
+                            Please input the topic you want your reading on.
+                        </div>
+                        <form method="post" id="mainform">
+                            {% csrf_token %}
+                            <div class="container mb-3 full-width">
+                                <input type="text" class="form-control full-width" id="topic-input" name="topic" placeholder="Topic" style="width:121%;" required>
+                                <ul id="suggestions-list" class="full-width">
+                                </ul>
+                            </div>
+                            <div class="form-footer">
+                                <button type="submit" id="submitButton" style="
+                                padding: 8px 24px;
+                                background-color: #000000;
+                                color: #FFFFFF;
+                                border-radius: 9999px;
+                                text-decoration: none;
+                                transition: background-color 0.3s ease;">Submit</button>
+                                <span class="spinner"></span>	
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.djangoData = {
+      lastCourseId: "{{ course_id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script src="{% static 'oldlibrary/vendor/hs-step-form/dist/hs-step-form.min.js' %}"></script>
+<script>
+    document.getElementById('topic-input').addEventListener('input', function() {
+        const query = this.value;
+        if (query.length > 2) { // Start searching after 3 characters
+            fetch(`/student/get-suggestions/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const suggestionsList = document.getElementById('suggestions-list');
+                suggestionsList.innerHTML = '';
+                
+                const showMoreButton = document.createElement('button');
+                showMoreButton.textContent = 'Show More';
+                showMoreButton.style.display = 'none'; // Initially hidden
+                showMoreButton.type = 'button'; // Prevent form submission
+
+                showMoreButton.style.border = '1px solid #000000'; // Blue border to match Bootstrap primary color
+                showMoreButton.style.backgroundColor = 'white';
+                showMoreButton.style.color = '#000000'; // Blue text to match border
+                showMoreButton.style.padding = '6px 12px'; // Add some padding
+                showMoreButton.style.borderRadius = '4px'; // Rounded corners
+                showMoreButton.style.cursor = 'pointer'; // Change cursor on hover
+
+                showMoreButton.addEventListener('click', function() {
+                    document.querySelectorAll('#suggestions-list .hidden').forEach(function(item) {
+                        item.style.display = 'list-item';
+                    });
+                    showMoreButton.style.display = 'none'; // Hide the button after showing all items
+                });
+    
+                data.suggestions.forEach((suggestion, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    li.classList.add('listitem');
+                    if (index >= 4) {
+                        li.style.display = 'none';
+                        li.classList.add('hidden');
+                        showMoreButton.style.display = 'block'; // Show the button if there are more than 4 suggestions
+                    }
+                    li.addEventListener('click', function() {
+                        document.getElementById('topic-input').value = suggestion;
+                        suggestionsList.innerHTML = '';
+                    });
+                    suggestionsList.appendChild(li);
+                });
+    
+                suggestionsList.appendChild(showMoreButton);
+            });
+        }
+    });
+</script>
+<script>
+  document.getElementById('submitButton').addEventListener('click', function(event) {
+      event.preventDefault();
+      var topicInput = document.getElementById('topic-input');
+      if (topicInput.value.trim() === '') {
+          return;
+      } 
+      document.querySelector('.spinner').style.display = 'inline-block'; // Show the spinner
+
+      // Submit the form immediately
+      document.getElementById('mainform').submit();
+
+      // Create and display the messages banner
+      var messageContainer = document.getElementById('messages-container');
+      var successMessage = document.createElement('div');
+      successMessage.className = 'alert alert-success alert-dismissible fade show custom-alert';
+      successMessage.role = 'alert';
+      successMessage.innerHTML = `
+          <strong>Success!</strong> We are creating your reading. It should be no more than a minute.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      messageContainer.appendChild(successMessage);
+
+      // Automatically remove the message after 5 seconds
+      setTimeout(function() {
+          successMessage.remove();
+      }, 5000);
+
+      // Start the confetti animation asynchronously
+      setTimeout(function() {
+          var duration = 5 * 1000;
+          var animationEnd = Date.now() + duration;
+          var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+          function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+          }
+
+          var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+              if (timeLeft <= 0) {
+                  return clearInterval(interval);
+              }
+              var particleCount = 50 * (timeLeft / duration);
+              confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+              confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+          }, 250);
+      }, 0);
+  });
+</script>
+<script>
+    // Variables to track visibility state and timer
+let hidden, visibilityChange, visibilityTimer;
+let tabLeftTime = null;
+
+// Set the name of the hidden property and the change event for visibility
+if (typeof document.hidden !== "undefined") {
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+
+// Function to get CSRF token from meta tag
+function getCSRFToken() {
+  return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+// Function to send request to Django endpoint
+function sendTabRequest(action) {
+  fetch('/student/left-page', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken()
+    },
+    body: JSON.stringify({
+      action: action,
+      timestamp: new Date().toISOString(),
+      duration: action === 'tab_returned' && tabLeftTime ? (new Date() - tabLeftTime) / 1000 : null
+    })
+  })
+  .then(response => response.json())
+  .then(data => console.log('Success:', data))
+  .catch((error) => console.error('Error:', error));
+}
+
+// Function to handle visibility change
+function handleVisibilityChange() {
+  if (document[hidden]) {
+    // The tab has become hidden - start the timer
+    visibilityTimer = setTimeout(() => {
+      sendTabRequest('tab_left');
+      tabLeftTime = new Date();
+    }, 5000);
+  } else {
+    // The tab has become visible
+    clearTimeout(visibilityTimer);
+    if (tabLeftTime) {
+      sendTabRequest('tab_returned');
+      tabLeftTime = null;
+    }
+  }
+}
+
+// Add the event listener for visibility change
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
+</script>
+{% endblock %}

@@ -1,0 +1,557 @@
+{% extends "teacher/app_layout.html" %} 
+{%load static %}
+{% block head %}
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+  }
+  .card-dashboard {
+    border: 1px solid #d3d3d3;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  .card-dashboard:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: auto repeat(7, 1fr);
+    gap: 1px;
+    background-color: #e0e0e0;
+  } 
+  .schedule-grid > div {
+    background-color: #ffffff;
+    padding: 0.5rem;
+    min-height: 2rem;
+  }
+  .schedule-header {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-time {
+    font-weight: bold;
+    text-align: right;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-cell {
+    cursor: pointer;
+  }
+  .schedule-cell:hover {
+    background-color: #f0f0f0;
+  }
+  .course-table {
+    width: 100%;
+  }
+  .course-table th:last-child,
+  .course-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+  }
+  .course-table td {
+    vertical-align: middle;
+  }
+  .course-action {
+    display: flex;
+    justify-content: flex-end;
+  }
+.streak-card:first-child {
+    margin-bottom: 1rem;
+}
+.task-list {
+  text-align: right;
+}
+
+.streak-card .card-body {
+  padding: 1rem 1rem 1rem 1rem;
+}
+.card-dashboard {
+  height: 100%;
+}
+.card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+.task-list {
+  flex-grow: 1;
+  text-align: right;
+}
+.button-container {
+  display: flex;
+  align-items: flex-end;
+  padding-left: 1rem;
+}
+.streak-card {
+  height: calc(50% - 0.5rem);
+}
+.streak-card:first-child {
+  margin-bottom: 1rem;
+}
+
+#streak-counter {
+  font-weight: bold;
+}
+.hover-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+.btn-wrapper:hover .hover-menu {
+  display: block;
+}
+a.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+<style>
+  .course-slider-container {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;  /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  }
+  .course-slider-container::-webkit-scrollbar {
+    display: none;  /* For Chrome, Safari, and Opera */
+}
+  .course-slider {
+      display: flex;
+      gap: 20px;
+  }
+  .course-card {
+      flex: 0 0 calc(25% - 10px);
+      height: 380px;
+      background-color: #FAFAFA;
+      border-radius: 20px;
+      position: relative;
+  }
+  .course-title {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: black;
+      font-family: 'Lato', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+  }
+  .continue-btn {
+      padding: 8px 24px;
+      background-color: #000000;
+      color: #FFFFFF;
+      border: 1px solid #000000;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      position: absolute;
+      bottom: 5%;
+      right: 5%;
+  }
+  .continue-btn:hover {
+      background-color: #333333;
+  }
+</style>
+<style>
+  .days {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+  }
+  .day {
+      text-align: center;
+      width: 18%;
+      padding: 10px 0;
+  }
+  .day-name {
+      font-size: 14px;
+      font-weight: bold;
+  }
+  .day-number {
+      font-size: 20px;
+  }
+  .current-day {
+      background-color: black;
+      color: white;
+      border-radius: 10px;
+  }
+  .events {
+      display: flex;
+      flex-direction: column;
+  }
+  .event {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+  }
+  .event-time {
+      width: 60px;
+      text-align: right;
+      margin-right: 10px;
+      color: #000000;
+  }
+  .event-name {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 10px;
+      color: #000000;
+  }
+  .event-short {
+      width: 30%;
+      margin-left: auto;
+  }
+  .event-long {
+      height: 50px;
+  }
+  .first-card {
+    background-color: #0BB96C;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div style="height:385px;">
+</div>
+<div class="row">
+  <div class="col-9">
+    <div class="row d-flex justify-content-between align-items-center">
+      <div class="col-auto">
+        <h1 style="font-weight: 300; font-size: 2rem; font-family: 'Lato', sans-serif;">{{title}}</h1>
+      </div>
+      <div class="col-auto">
+          <a class="btn mx-2" style="
+            padding: 8px 24px;
+            background-color: #000000;
+            color: #FFFFFF;
+            border: 1px solid #000000;
+            border-radius: 9999px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;"
+            href="{%url "data_dashboard" course_id=course_id%}">
+          Full Analysis
+        </a>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-6">
+        <div class="card" style="
+  height: 380px; 
+  position: relative; 
+  background-color: #0BB96C; 
+  background-size: cover;
+  background-position: 0% 0%; 
+  background-repeat: no-repeat;
+  border-radius: 20px;">
+  <div style="
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-family: 'Lato', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;">
+    Test Readiness Progress
+  </div>
+  
+  <!-- Larger SVG graph -->
+  <svg width="340" height="320" viewBox="0 0 340 320" style="position: absolute; bottom: 10px; left: 10px;">
+    <!-- Y-axis -->
+    <line x1="40" y1="20" x2="40" y2="300" stroke="white" stroke-width="2"/>
+    <!-- X-axis -->
+    <line x1="40" y1="300" x2="320" y2="300" stroke="white" stroke-width="2"/>
+    
+    <!-- Y-axis labels -->
+    <text x="10" y="300" fill="white" font-size="14">50</text>
+    <text x="10" y="20" fill="white" font-size="14">100</text>
+    
+    <!-- X-axis labels -->
+    <text x="40" y="315" fill="white" font-size="14">Aug</text>
+    <text x="300" y="315" fill="white" font-size="14">Sep</text>
+    
+    <!-- Higher wobbly graph line -->
+    <path
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="4"
+      d="M40,250 Q100,200 160,180 T240,120 Q280,100 320,60"
+    />
+</svg>
+  
+  <a href="{% url 'teacher_assessment' course_id=course_id %}" class="btn" style="
+    padding: 8px 24px;
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 1px solid #;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;">
+    Continue
+  </a>
+</div>
+      </div>
+      <div class="col-6">
+        <div class="card" style="
+          height: 380px; 
+          position: relative; 
+          background-color: #FAFAFA; 
+          background-size: cover;
+          background-position: 0% 0%; 
+          background-repeat: no-repeat;
+          border-radius: 20px;">
+  <div style="
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: black;
+    font-family: 'Lato', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;">
+    Special In-Class Activities
+  </div>
+  
+  <table style="
+    width: 90%;
+    margin: 60px auto 0;
+    border-collapse: collapse;
+    font-family: 'Lato', sans-serif;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Activity</th>
+        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Target Area</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">Debate Club Simulation</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">Public Speaking & Argumentation</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">Poetry Slam Workshop</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">Creative Writing & Self-Expression</td>
+      </tr>
+
+    </tbody>
+  </table>
+  
+  <a href="{%if last_course_id%}{% url 'course' course_id=last_course_id.id %}{%else%}#{%endif%}" class="btn" style="
+    padding: 8px 24px;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;">
+    Add New
+  </a>
+</div>
+      </div>
+    </div>
+    <div class="row mt-3" >
+      <div class="col">
+        <div class="card" style="height: 260px; background-color: #FAFAFA; font-family: Arial, sans-serif; padding: 20px; border-radius: 20px;">
+          <h2 style="margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight:300;">Upcoming Classes</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #EEEEEE;">
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Class</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Topic</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Status</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Starts in</th>
+                <th ></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 10px 5px;">English Language</td>
+                <td style="padding: 10px 5px;">Music Reading</td>
+                <td style="padding: 10px 5px;">
+                  <a href="{%url "lesson_editor" qid="7d5fd192-d829-4e26-9833-6ac0ade55bf3"%}" style="background-color: #0BB96C; color: white; padding: 5px 10px; border-radius: 15px; font-size: 14px;">Materials Ready</a>
+                </td>
+                <td style="padding: 10px 5px;">30 minutes</td>
+                <td style="padding: 10px 5px; text-align: center;" ><a style="color:black; text-decoration: underline;" href="{%url "lesson_editor" qid="7d5fd192-d829-4e26-9833-6ac0ade55bf3"%}">View Materials</a><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
+                  <path d="M14 5l7 7-7 7M21 12H3" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="row mb-3">
+      <div class="col-12">
+        <h1 style="font-weight: 300; font-size: 24px; font-family: 'Lato', sans-serif;">Take a Look At The Progress of Your Students</h1>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-6">
+        <a href="#" class="btn" style="
+          padding: 8px 24px;
+          background-color: #FFFFFF;
+          color: #000000;
+          border: 1px solid #000000;
+          border-radius: 9999px;
+          text-decoration: none;
+          transition: background-color 0.3s ease;">
+          September
+        </a>
+      </div>
+      <div class="col-6 d-flex justify-content-end">
+        <button class="btn btn-circle me-2" style="
+          width: 40px;
+          height: 40px;
+          padding: 6px 0;
+          border-radius: 50%;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1.428571429;
+          background-color: #FFFFFF;
+          color: #000000;
+          border: 1px solid #000000;">
+          <
+        </button>
+        <button class="btn btn-circle" style="
+          width: 40px;
+          height: 40px;
+          padding: 6px 0;
+          border-radius: 50%;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1.428571429;
+          background-color: #000000;
+          color: #FFFFFF;
+          border: 1px solid #000000;">
+          >
+        </button>
+      </div>
+    </div>
+    <div class="row mt-3" >
+      <div class="card" style="height:600px; width:100%; max-width:400px; border:1px solid #000000; font-family: Arial, sans-serif; border-radius: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid #EEEEEE;">
+              <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Name</th>
+              <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Progress</th>
+              <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Readiness</th>
+              <th ></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%for student in students%}
+            <tr>
+              
+              <td>{{student.name}}</td>
+              <td>{{student.progress}}</td>
+              <td>{{student.readiness}}</td>
+            </tr>
+            {%endfor%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCourseModalLabel">Create Class</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            {{ course_form.name.label_tag }}<br>
+            {{ course_form.name }}
+          </div>
+          <div class="form-group">
+            {{ course_form.description.label_tag }}<br>
+            {{ course_form.description }}
+          </div>
+          <button type="submit" name="course_creation" style="
+          padding: 8px 24px;
+          background-color: #000000;
+          color: #FFFFFF;
+          border: 1px solid #000000;
+          border-radius: 9999px;
+          text-decoration: none;
+          transition: background-color 0.3s ease;">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var cefrRatings = document.querySelectorAll('.cefr-rating');
+      var totalStudents = parseInt(document.getElementById('submit-button').getAttribute('data-total-students'));
+      
+      // Check if the number of select elements matches the total number of students
+      if (cefrRatings.length !== totalStudents) {
+          // Enable the submit button if every student has a CEFR rating select element
+          document.getElementById('submit-button').disabled = false;
+      }
+  });
+  </script>   
+  <script>
+    document.getElementById('set_all_button').addEventListener('click', function() {
+      const cefrRating = document.getElementById('global_cefr_rating').value;
+      const level = document.getElementById('global_level').value;
+      
+      if (cefrRating) {
+        document.querySelectorAll('.cefr-rating').forEach(select => {
+          select.value = cefrRating;
+        });
+      }
+      
+      if (level) {
+        document.querySelectorAll('.level').forEach(select => {
+          select.value = level;
+        });
+      }
+    
+      // Create a hidden input to submit with the form
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'cefr';
+      hiddenInput.value = 'true';
+      document.getElementById('cefr_form').appendChild(hiddenInput);
+    
+      document.getElementById('cefr_form').submit();
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      var submitButton = document.getElementById('submit-button');
+      submitButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('cefr_form').submit();
+      });
+    });
+    </script>
+{% endblock %}

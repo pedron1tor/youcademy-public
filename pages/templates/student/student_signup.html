@@ -1,0 +1,686 @@
+{% extends "new_app_layout.html" %}
+{%load static %}
+{% block head %}
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+  }
+  .card-dashboard {
+    border: 1px solid #d3d3d3;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  .card-dashboard:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: auto repeat(7, 1fr);
+    gap: 1px;
+    background-color: #e0e0e0;
+  } 
+  .schedule-grid > div {
+    background-color: #ffffff;
+    padding: 0.5rem;
+    min-height: 2rem;
+  }
+  .schedule-header {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-time {
+    font-weight: bold;
+    text-align: right;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-cell {
+    cursor: pointer;
+  }
+  .schedule-cell:hover {
+    background-color: #f0f0f0;
+  }
+  .course-table {
+    width: 100%;
+  }
+  .course-table th:last-child,
+  .course-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+  }
+  .course-table td {
+    vertical-align: middle;
+  }
+  .course-action {
+    display: flex;
+    justify-content: flex-end;
+  }
+.streak-card:first-child {
+    margin-bottom: 1rem;
+}
+.task-list {
+  text-align: right;
+}
+
+.streak-card .card-body {
+  padding: 1rem 1rem 1rem 1rem;
+}
+.card-dashboard {
+  height: 100%;
+}
+.card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+.task-list {
+  flex-grow: 1;
+  text-align: right;
+}
+.button-container {
+  display: flex;
+  align-items: flex-end;
+  padding-left: 1rem;
+}
+.streak-card {
+  height: calc(50% - 0.5rem);
+}
+.streak-card:first-child {
+  margin-bottom: 1rem;
+}
+
+#streak-counter {
+  font-weight: bold;
+}
+.hover-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+.btn-wrapper:hover .hover-menu {
+  display: block;
+}
+a.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+<style>
+  .course-slider-container {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;  /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  }
+  .course-slider-container::-webkit-scrollbar {
+    display: none;  /* For Chrome, Safari, and Opera */
+}
+  .course-slider {
+      display: flex;
+      gap: 20px;
+  }
+  .course-card {
+      flex: 0 0 calc(50% - 10px);
+      height: 380px;
+      background-color: #FAFAFA;
+      border-radius: 20px;
+      position: relative;
+  }
+  .course-title {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: black;
+      font-family: 'Lato', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+  }
+  .continue-btn {
+      padding: 8px 24px;
+      background-color: #000000;
+      color: #FFFFFF;
+      border: 1px solid #000000;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      position: absolute;
+      bottom: 5%;
+      right: 5%;
+  }
+  .continue-btn:hover {
+      background-color: #333333;
+  }
+</style>
+<style>
+  .days {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+  }
+  .day {
+      text-align: center;
+      width: 18%;
+      padding: 10px 0;
+  }
+  .day-name {
+      font-size: 14px;
+      font-weight: bold;
+  }
+  .day-number {
+      font-size: 20px;
+  }
+  .current-day {
+      background-color: black;
+      color: white;
+      border-radius: 10px;
+  }
+  .events {
+      display: flex;
+      flex-direction: column;
+  }
+  .event {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+  }
+  .event-time {
+      width: 60px;
+      text-align: right;
+      margin-right: 10px;
+      color: #000000;
+  }
+  .event-name {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 10px;
+      color: #000000;
+  }
+  .event-short {
+      width: 30%;
+      margin-left: auto;
+  }
+  .event-long {
+      height: 50px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="height:385px;">
+</div>
+<div class="row">
+  <div class="col-9">
+    <div class="row d-flex justify-content-between align-items-center">
+      <div class="col-auto">
+        <h1 style="font-weight: 300; font-size: 2rem; font-family: 'Lato', sans-serif;">Continue Where You Left Off</h1>
+      </div>
+      <div class="col-auto">
+          <a class="btn mx-2" style="
+            padding: 8px 24px;
+            background-color: #000000;
+            color: #FFFFFF;
+            border: 1px solid #000000;
+            border-radius: 9999px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+          Add Course
+        </a>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-6">
+        <div class="card" style="
+          height: 380px; 
+          position: relative; 
+          background-color: #0BB96C; 
+          background-image: url('{%static "Book.png"%}');
+          background-size: cover;
+          background-position: 0% 0%; 
+          background-repeat: no-repeat;
+          border-radius: 20px;">
+          <div style="
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: 'Lato', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 500;">
+            English Language
+          </div>
+          <a href="{%if last_course_id%}{% url 'course' course_id=last_course_id.id %}{%else%}#{%endif%}" class="btn" style="
+            padding: 8px 24px;
+            background-color: #FFFFFF;
+            color: #000000;
+            border: 1px solid #;
+            border-radius: 9999px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            bottom: 5%;
+            right: 5%;">
+            Continue
+          </a>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="course-slider-container">
+          <div class="course-slider">
+            <div class="course-card">
+              <div class="course-title">Math</div>
+                      <a href="#" class="continue-btn">Continue</a>
+            </div>
+              {% for course in courses %}
+                  <div class="course-card">
+                      <div class="course-title">{{ course.name }}</div>
+                      <a href="{% url 'course' course_id=course.id %}" class="continue-btn">Continue</a>
+                  </div>
+              {% endfor %}
+          </div>
+      </div>
+      </div>
+    </div>
+    <div class="row mt-3" >
+      <div class="col">
+        <div class="card" style="height: 260px; background-color: #FAFAFA; font-family: Arial, sans-serif; padding: 20px;  border-radius: 20px;">
+          <h2 style="margin-top: 0; margin-bottom: 20px; font-size: 24px;">Homework</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #EEEEEE;">
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Course</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Assignment</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Status</th>
+                <th style="text-align: left; padding: 10px 5px; color: #888888; font-weight: normal;">Due Date</th>
+                <th style="width: 20px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 10px 5px;">English Language</td>
+                <td style="padding: 10px 5px;">Music Reading</td>
+                <td style="padding: 10px 5px;">
+                  <span style="background-color: #0BB96C; color: white; padding: 5px 10px; border-radius: 15px; font-size: 14px;">Done</span>
+                </td>
+                <td style="padding: 10px 5px;">4 Days</td>
+                <td style="padding: 10px 5px; text-align: center;">⋮</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="row mb-3">
+      <div class="col-12">
+        <h1 style="font-weight: 300; font-size: 2rem; font-family: 'Lato', sans-serif;">Keep Going! You're on a day {{learning_streak}} streak!</h1>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-6">
+        <a href="#" class="btn" style="
+          padding: 8px 24px;
+          background-color: #FFFFFF;
+          color: #000000;
+          border: 1px solid #000000;
+          border-radius: 9999px;
+          text-decoration: none;
+          transition: background-color 0.3s ease;">
+          September
+        </a>
+      </div>
+      <div class="col-6 d-flex justify-content-end">
+        <button class="btn btn-circle me-2" style="
+          width: 40px;
+          height: 40px;
+          padding: 6px 0;
+          border-radius: 50%;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1.428571429;
+          background-color: #FFFFFF;
+          color: #000000;
+          border: 1px solid #000000;">
+          <
+        </button>
+        <button class="btn btn-circle" style="
+          width: 40px;
+          height: 40px;
+          padding: 6px 0;
+          border-radius: 50%;
+          text-align: center;
+          font-size: 12px;
+          line-height: 1.428571429;
+          background-color: #000000;
+          color: #FFFFFF;
+          border: 1px solid #000000;">
+          >
+        </button>
+      </div>
+    </div>
+    <div class="row mt-3" >
+      <div class="card" style="height:300px; width:100%; max-width:400px; border:1px solid #000000; font-family: Arial, sans-serif; border-radius: 20px;">
+      <div class="events">
+        <br>
+          <div class="event">
+              <div class="event-time">Sep 20</div>
+              <div class="event-name" style="background-color: #E0B0FF;">English Test</div>
+          </div>
+          <div class="event">
+              <div class="event-time">Sep 20</div>
+              <div class="event-name" style="background-color: #FFE082;"> Reading Comprehension </div>
+          </div>
+          <div class="event">
+              <div class="event-time">Sep 22</div>
+              <div class="event-name event-short" style="background-color: #FFAB91;">Math Test</div>
+          </div>
+          <div class="event">
+              <div class="event-time">Sep 22</div>
+              <div class="event-name event-long" style="background-color: #81D4FA;">Deadline to finish problem set</div>
+          </div>
+          <div class="event">
+              <div class="event-time">Sep 22</div>
+              <div class="event-name" style="background-color: #A5D6A7;">Deadline to finish reading #2</div>
+          </div>
+      </div>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div style="background-color: #0BB96C; width: 100%; max-width: 400px; height: 245px; padding: 20px; border-radius: 20px; font-family: Arial, sans-serif;">
+        <div style="color: white; font-size: 24px; font-weight: 500; margin-top:-10px; margin-bottom:5px;">
+          Challenges this Week
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 24px; height: 24px; background-color: white; border-radius: 50%;"></div>
+            <div style="flex-grow: 1;">
+              <div style="color: white; font-size: 14px; margin-bottom: 5px;">Learn 6 days in a row</div>
+              <div style="background-color: rgba(255,255,255,0.3); height: 6px; border-radius: 3px;">
+                <div style="background-color: white; width: 80%; height: 100%; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 24px; height: 24px; background-color: white; border-radius: 50%;"></div>
+            <div style="flex-grow: 1;">
+              <div style="color: white; font-size: 14px; margin-bottom: 5px;">Get 15 words correct in a row</div>
+              <div style="background-color: rgba(255,255,255,0.3); height: 6px; border-radius: 3px;">
+                <div style="background-color: white; width: 60%; height: 100%; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 24px; height: 24px; background-color: white; border-radius: 50%;"></div>
+            <div style="flex-grow: 1;">
+              <div style="color: white; font-size: 14px; margin-bottom: 5px;">Learn and use 20 new words</div>
+              <div style="background-color: rgba(255,255,255,0.3); height: 6px; border-radius: 3px;">
+                <div style="background-color: white; width: 90%; height: 100%; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 24px; height: 24px; background-color: white; border-radius: 50%;"></div>
+            <div style="flex-grow: 1;">
+              <div style="color: white; font-size: 14px; margin-bottom: 5px;">Improve understanding of spoken English</div>
+              <div style="background-color: rgba(255,255,255,0.3); height: 6px; border-radius: 3px;">
+                <div style="background-color: white; width: 20%; height: 100%; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCourseModalLabel">Add New Course</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="course_name" class="form-label">Course Name</label>
+            <input type="text" id="course_name" name="course_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="course_code" class="form-label">Course Code</label>
+            <input type="text" id="course_code" name="course_code" class="form-control" required>
+          </div>
+          <button type="submit" name="add_course" style="
+          padding: 8px 24px;
+          background-color: #000000;
+          color: #FFFFFF;
+          border: 1px solid #000000;
+          border-radius: 9999px;
+          text-decoration: none;
+          transition: background-color 0.3s ease;">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+  // Declare global variables with Django template variables
+  window.djangoData = {
+      lastCourseId: "{{ last_course_id.id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    const intro = introJs();
+
+// Configure the steps
+intro.setOptions({
+  steps: [
+    {
+      element: '#feedbackDropdown',
+      intro: 'You can always go back to the tour by clicking here',
+      position: 'bottom'
+    },
+    {
+      element: '#startTour',
+      intro: 'And here',
+      position: 'bottom'
+    }
+  ],
+  exitOnOverlayClick: false,
+  showBullets: false,
+  showProgress: true
+});
+
+// Function to open the dropdown
+function openDropdown() {
+  return new Promise((resolve) => {
+    const dropdownElement = document.querySelector('#dropdownTarget');
+    if (dropdownElement) {
+      dropdownElement.classList.add('show');
+      // If using Bootstrap, you might use:
+      // $(dropdownElement).dropdown('show');
+    }
+    setTimeout(resolve, 300);
+  });
+}
+
+// Listen for 'beforeChange' event
+intro.onbeforechange(function(targetElement) {
+  if (targetElement.id === 'startTour') {
+    openDropdown().then(() => {
+      // Refresh the position of the tooltip after opening the dropdown
+      intro.refresh();
+    });
+  }
+});
+
+// Override the 'complete' method to close the dropdown
+intro.oncomplete(function() {
+  const dropdownElement = document.querySelector('#dropdownTarget');
+  if (dropdownElement) {
+    dropdownElement.classList.remove('show');
+    // TODO add a form submission to set tour variable to True
+  }
+});
+
+  
+
+    {% if not tour %}
+    var welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+    const beginTourBtn = document.getElementById('beginTourBtn');
+    const startLaterBtn = document.getElementById('startLaterBtn');
+  
+    function beginTour() {
+      welcomeModal.hide();
+      console.log('Beginning the tour...');
+    }
+  
+    function startLater() {
+      welcomeModal.hide();
+      fetch('/api/finish-tour/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}' 
+        },
+        body: JSON.stringify({}), // Add any payload data if needed
+        credentials: 'include' // Add this line
+      })
+        .then(response => {
+          // Handle the response
+        })
+        .catch(error => {
+          // Handle the error
+        });
+      intro.start()
+    }
+  
+    beginTourBtn.addEventListener('click', beginTour);
+    startLaterBtn.addEventListener('click', startLater);
+
+    {% endif %}
+    
+  
+    
+      const streakCounter = document.getElementById('streak-counter');
+      const timeDisplays = document.querySelectorAll('.time-display');
+      const targetStreak = {{learning_streak}}; // Replace with your actual user streak value from the backend
+      let currentCount = 0;
+  
+      // Predefined set of vibrant colors
+      const vibrantColors = [
+          '#8A2BE2', // Purple
+          '#FFD700', // Yellow
+          '#FF69B4', // Pink
+          '#FFA500', // Orange
+          '#FF0000', // Red
+          '#00FF00'  // Green
+      ];
+  
+      let lastColorIndex = -1;
+  
+      function easeOutQuad(t) {
+          return t * (2 - t);
+      }
+  
+      function getNextVibrantColor() {
+          let newIndex;
+          do {
+              newIndex = Math.floor(Math.random() * vibrantColors.length);
+          } while (newIndex === lastColorIndex);
+          lastColorIndex = newIndex;
+          return vibrantColors[newIndex];
+      }
+  
+      function animateCount(timestamp) {
+          if (!animateCount.startTime) {
+              animateCount.startTime = timestamp;
+          }
+  
+          const elapsed = timestamp - animateCount.startTime;
+          const duration = 3000; // Total animation duration in milliseconds
+          const progress = Math.min(elapsed / duration, 1);
+  
+          const newCount = Math.round(easeOutQuad(progress) * targetStreak);
+          
+          if (newCount !== currentCount) {
+              currentCount = newCount;
+              streakCounter.textContent = currentCount;
+              streakCounter.style.color = getNextVibrantColor();
+          }
+  
+          if (progress < 1) {
+              requestAnimationFrame(animateCount);
+          } else {
+              streakCounter.style.color = getNextVibrantColor();
+          }
+      }
+  
+      // Countdown timer function
+      function startCountdown() {
+          let totalSeconds = {{seconds_until_review}}; // 1 hour in seconds
+          let colorChangeCounter = 0;
+  
+          function updateCountdown() {
+              const days = Math.floor(totalSeconds / (3600 * 24));
+              const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+              const minutes = Math.floor((totalSeconds % 3600) / 60);
+              const seconds = totalSeconds % 60;
+  
+              timeDisplays[0].textContent = days;
+              timeDisplays[1].textContent = hours.toString().padStart(2, '0');
+              timeDisplays[2].textContent = minutes.toString().padStart(2, '0');
+              timeDisplays[3].textContent = seconds.toString().padStart(2, '0');
+  
+              if (totalSeconds > 0) {
+                  totalSeconds--;
+                  colorChangeCounter++;
+  
+                  if (colorChangeCounter >= 30) {
+                      const newColor = getNextVibrantColor();
+                      timeDisplays.forEach(display => {
+                          display.style.color = newColor;
+                      });
+                      colorChangeCounter = 0;
+                  }
+  
+                  setTimeout(updateCountdown, 1000);
+              }
+          }
+  
+          updateCountdown();
+      }
+  
+      // Start both animations
+      setTimeout(() => {
+          requestAnimationFrame(animateCount);
+          startCountdown();
+      }, 500);
+  });
+  </script>
+{% endblock %}
