@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "target": "es5",                                // Specify ECMAScript target version
+      "module": "es6",                                // Specify module code generation
+      "jsx": "react-jsx",                             // Support JSX in .tsx files
+      "strict": true,                                 // Enable all strict type-checking options
+      "moduleResolution": "node",                     // Module resolution strategy
+      "esModuleInterop": true,                        // Allows for import of modules without default export
+      "skipLibCheck": true,                           // Skip type checking of all declaration files
+      "forceConsistentCasingInFileNames": true,       // Disallow inconsistently-cased references to the same file
+      "allowSyntheticDefaultImports": true,           // Allow default imports from modules with no default export
+      "include": ["src/**/*"]                         // Files to be included in the compilation
+    },
+    "include": [
+      "src/**/*"
+, "src/liveblocks.config.ts"    ],
+    "exclude": [
+      "node_modules", "build"                         // Folders to exclude from the compilation
+    ]
+  }

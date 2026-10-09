@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "target": "es5",                   // Target ECMAScript version for the output JavaScript
+      "lib": ["dom", "dom.iterable", "esnext"],  // Specify libraries for the type checker
+      "allowJs": true,                   // Allow JavaScript files to be compiled
+      "skipLibCheck": true,              // Skip type checking of declaration files (*.d.ts)
+      "esModuleInterop": true,           // Enables emit interoperability between CommonJS and ES Modules
+      "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+      "strict": true,                    // Enable all strict type-checking options
+      "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
+      "module": "esnext",                // Specify module code generation method
+      "moduleResolution": "node",        // Determine how modules get resolved
+      "resolveJsonModule": true,         // Include modules imported with '.json' extension
+      "isolatedModules": true,           // Perform more rigorous isolation between modules
+      "jsx": "react-jsx",                // Support JSX in .tsx files: "preserve", "react", or "react-native"
+      "incremental": true                // Enable incremental compilation by saving information about the project graph from the last compilation
+    },
+    "include": [
+      "reactapps/src/**/*.ts",     // Include all TypeScript files in src folder
+      "reactapps/src/**/*.tsx"     // Include all TypeScript and JSX files in src folder
+    ],
+    "exclude": [
+      "node_modules"     // Exclude the node_modules directory
+    ]
+  }

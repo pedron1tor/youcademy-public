@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Add this to your globals.css or a CSS module linked to your top-level component */
+/* Path: reactapps/chatreact/src/styles/globals.css */
