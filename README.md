@@ -25,6 +25,51 @@ An English-learning web platform for students and teachers. Students read texts 
 | AI / ML | OpenAI API, Groq, PyTorch (Lexile classifier) |
 | Cloud | Google Cloud Run, Cloud Storage, Pub/Sub, Cloud Tasks, Cloud Build, Docker |
 
+## Screenshots
+
+### Student dashboard and courses
+
+![Dashboard](doc/img/screenshots/dashboard.png)
+*Dashboard: continue a course, check homework, keep a learning streak, see the calendar and weekly challenges.*
+
+![Courses](doc/img/screenshots/courses.png)
+*Courses: every course a student is enrolled in.*
+
+### Learning path
+
+![Learning path](doc/img/screenshots/learning-path.png)
+*The English learning path is split into units (Learn the Basics, Understand the World, Interact With the World), with a daily study schedule beside it.*
+
+### Flashcards with spaced repetition
+
+![Flashcard front](doc/img/screenshots/flashcard-front.png)
+*A flashcard prompt.*
+
+![Flashcard answer](doc/img/screenshots/flashcard-answer.png)
+*After revealing the answer, the student rates recall (Again / Hard / Good / Easy) and the spaced-repetition algorithm schedules the next review.*
+
+![Deck complete](doc/img/screenshots/deck-complete.png)
+*Finishing the day's deck.*
+
+### Writing editor with AI chat
+
+![Writing editor with chat](doc/img/screenshots/writing-editor-chat.png)
+*The Notion-style writing editor with a real-time AI chat assistant that answers questions about the student's essay.*
+
+### Level-adaptive reading and quizzes
+
+![Reading with highlights](doc/img/screenshots/reading-highlights.png)
+*A reading adapted to the student's level. Students highlight key fragments and unknown words, and take notes alongside.*
+
+![Multiple-choice question](doc/img/screenshots/quiz-multiple-choice.png)
+*Comprehension quiz: multiple-choice questions generated from the reading.*
+
+![Highlight-the-answer question](doc/img/screenshots/quiz-highlight-answer.png)
+*Highlight question: the student selects the sentence in the passage that answers the question.*
+
+![Short-answer question](doc/img/screenshots/quiz-short-answer.png)
+*Short-answer question, graded with AI.*
+
 ## Django Project Diagram
 
 ```mermaid
