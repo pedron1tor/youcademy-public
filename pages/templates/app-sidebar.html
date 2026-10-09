@@ -1,0 +1,34 @@
+<!-- Content -->
+<div style="background-color: {{color}}">
+  {% if path == 'Dashboard' %}
+  <div class="content container" style="height: 26rem;">
+  {% else %}
+  <div class="content container" style="height: 26rem;">
+  {% endif %}
+    <!-- Page Header -->
+    <div class="page-header page-header-light page-header-reset">
+      <div class="row align-items-center">
+        <div class="col">
+          <h1 class="page-header-title">{{ path }}</h1>
+        </div>
+        <!-- End Col -->
+        {% if path == "Dashboard" %}
+        {% elif path == "English / Writing"%}
+        {%elif path == "Dashboard / Create Reading" %}
+        {%elif path == "English / Flashcards"%}
+        {%elif path == "Lesson Plans"%}
+        {%elif path == "English / Reading"%}
+        {%elif path == "English / Pronunciation"%}
+        {% else %}
+        <div class="col-auto" style="margin-top: -10px;">
+          <a id="goBackLink"><button type="button" class="btn btn-white" style="color: black;">Go back</button></a>
+        </div>
+        {% endif %}
+        <!-- End Col -->
+      </div>
+      <!-- End Row -->
+    </div>
+    <!-- End Page Header -->
+  </div>
+</div>
+<!-- End Content -->

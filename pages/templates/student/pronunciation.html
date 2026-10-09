@@ -1,0 +1,728 @@
+{% extends 'new_app_layout.html' %}
+{% load static %}
+{%load custom_filters %}
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+    .progress-container {
+        background-color: #e0e0e0;
+        border-radius: 8px;
+        height: 20px;
+        width: 80%;
+        margin-top: 5px;
+        overflow: hidden;  /* Add this to contain the progress bar */
+    }
+    .progress-bar {
+        background-color: #4CAF50 !important;
+        height: 100%;
+        border-radius: 8px;
+        width: 0;
+        transition: width 0.5s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;  /* Make text white for visibility */
+        font-size: 12px;  /* Adjust as needed */
+    }
+    .navigation-buttons {
+        position: absolute;
+        bottom: 20px;
+    }
+    .navbuttons {
+        border: 1px solid #4CAF50;
+    }
+    .sentence {
+        font-size: 50px !important;
+    }
+    .mic-button {
+        display: inline-block;
+        border-radius: 50%;
+        transition: background-color 0.3s, transform 0.1s;
+      }
+    
+      .mic-button:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    
+      .mic-button:active {
+        transform: scale(0.95);
+      }
+      .recorder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      #rec-success {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .feedback-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 50px; /* Adjust as needed */
+        width: 100%;
+    }
+    .feedback-image {
+        position: absolute;
+        display: none;
+    }
+    #correct {
+        height: 30px;
+        width: 30px;
+    }
+    #incorrect {
+        height: 15px;
+        width: 15px;
+    }
+    .annotation-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        font-size: 0.9em; /* Slightly reduce font size */
+      }
+      .annotation-table th, .annotation-table td {
+        border-right: 1px solid #ddd;
+        padding: 4px 6px; /* Reduce padding */
+        text-align: center;
+        line-height: 1.2; /* Reduce line height */
+      }
+      .annotation-table th:last-child, .annotation-table td:last-child {
+        border-right: none;
+      }
+      .annotation-table tr:last-child td {
+        border-bottom: none;
+      }
+      .annotation-table thead {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+      .annotation-table tbody tr {
+        height: 24px; /* Set a fixed height for body rows */
+      }
+      .hover-menu {
+        position: absolute;
+        z-index: 1000;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        /* Add a small top margin to separate it slightly from the word */
+        margin-top: 5px;
+      }
+</style>
+{% endblock %}
+{% block content %}
+{% include "app-header.html" %}
+<div class="card" style="min-height: 550px">
+    <div class="card-body">
+        <div class="progress-container">
+            <div class="progress-bar" id="myProgressBar"></div>
+        </div>
+        <div class="sentence" style="margin-top: 100px;">
+            <h1 class="sentence" id="contentToHighlight">{{sentence}}<h1>
+        </div>
+        <div>
+            {%if review%}
+            <div style="text-align: center;">
+            <audio id="audioPlayback" controls>
+                <source src="{{audio_url}}" type="audio/wav">
+              </audio>
+            </div>
+            <div style="text-align: center;">
+                <h3>Results</h3>
+            </div>
+            <div class="row">
+                <div class="col">
+            <table class="annotation-table">
+                <thead>
+                    <tr>
+                    <th>Metric</th>
+                    <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>Overall</td>
+                    <td>{{doc.result.result.overall}}</td>
+                    </tr>
+                    <tr>
+                    <td>
+                        Rhythm
+                    </td>
+                    <td>
+                        {{doc.result.result.rhythm}}
+                    </tr>
+                    <tr>
+                        <td>
+                        Speed (WPM)
+                        </td>
+                        <td>
+                        {{doc.result.result.speed}} 
+                        </td>
+                    <tr>
+                        <td>
+                        Rear Tone
+                        </td>
+                        <td>
+                        {{doc.result.result.rear_tone}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        Duration (s)
+                        </td>
+                        <td>
+                        {{doc.result.result.duration}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        Integrity
+                        </td>
+                        <td>
+                        {{doc.result.result.integrity}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        Fluency
+                        </td>
+                        <td>
+                        {{doc.result.result.fluency}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        Pronunciation
+                        </td>
+                        <td>
+                        {{doc.result.result.pronunciation}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Pause Count
+                            </td>
+                            <td>
+                            {{doc.result.result.pause_count}}
+                            </td>
+                    </tr>
+            </table>
+            <div id="colorBar" style="margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span id="minScore"></span>
+                  <div style="flex-grow: 1; height: 20px; margin: 0 10px; border-radius: 10px; overflow: hidden;" ></div>
+                  <span id="maxScore"></span>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+            <table class="annotation-table" id="phoneme">
+                <thead>
+                    <tr>
+                    <th>Phoneme</th>
+                    <th>Overall</th>
+                    <th>Sound Like</th>
+                    <th>Stress Mark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+            </div>  
+            {%endif%}
+        </div>
+        {%if not review%}
+        <div  class="recorder">
+            <canvas id="visualizer" width="300" height="100"></canvas>
+            <a class="mic-button" style="margin-top:20px;"onclick="toggleRecording()"><img src={%static "mic.svg"%} style="height:50px; width: 50px;"></a>
+            <div id="rec-success" style="display:none; text-align: center;">
+                <h3 style="margin-top:20px;">Recording Successful!</h3>
+                <audio id="audioPlayback" controls style="display: none;"></audio>
+                <div class="feedback-container">
+                    <img id="correct" class="feedback-image" src="{% static 'greentick.svg' %}" alt="Correct">
+                    <img id="incorrect" class="feedback-image" src="{% static 'redx.svg' %}" alt="Incorrect">
+                </div>
+            </div>
+        </div>
+        {%endif%}
+        <div>
+            <canvas id="visualizer" width="200px" height="50px"></canvas>
+        </div>
+        <div class="navigation-buttons" id="navButtons" style="margin-top:20px;">
+            {%if review%}<button class="btn btn-primary navbuttons" style="border: 2px solid black; background-color: white; color: black;" onclick="prevQuestion({{question_id}})">Previous</button> {%endif%}
+            <button class="btn btn-primary navbuttons" style="border: 2px solid black; background-color: white; color: black;" onclick="nextQuestion({{question_id}})">Next</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function prevQuestion(questionId){
+        event.preventDefault();  // Stop the form from submitting normally
+        let newUrl;
+        if (window.location.pathname.startsWith('/teacher/')) {
+            newUrl = `/teacher/class/questions-view/${questionId-1}`;
+        } else if ({{question_id}} > 1){
+                newUrl = `/student/pronunciation/{{course_id}}/${questionId-1}`;
+        }
+        else {
+            newUrl = `/student/pronunciation-dash/{{course_id}}`;
+        }
+        window.location.href = newUrl;  // Navigate to the selected question
+    }
+    function nextQuestion(questionId){
+        event.preventDefault();  // Stop the form from submitting normally
+        let newUrl;
+        if (window.location.pathname.startsWith('/teacher/')) {
+                newUrl = `/teacher/class/questions-view/${questionId+1}`;
+        } else if ({{question_id}} < 10){
+                newUrl = `/student/pronunciation/{{course_id}}/${questionId+1}`;
+        }
+        else {
+            newUrl = `/student/pronunciation-dash/{{course_id}}`;
+        }
+        window.location.href = newUrl;  // Navigate to the selected question
+    }
+    const progressBar = document.getElementById('myProgressBar');
+    const progressText = document.getElementById('progressText');
+    const currentQuestionId = parseInt("{{ question_id }}", 10);
+    const totalQuestions = 10;
+
+    function calculateProgress(questionId) {
+        return Math.round((questionId / totalQuestions) * 100);
+    }
+
+    function updateProgressBar(progress) {
+        progressBar.style.width = progress + '%';
+    }
+
+    function handleProgress() {
+        const progress = calculateProgress(currentQuestionId);
+        updateProgressBar(progress);
+
+        if (progress >= 100) {
+            console.log("last question");
+        }
+    }
+
+    // Run on page load
+    handleProgress();
+</script>
+{%if not review%}
+<script>
+    const micButton = document.querySelector('.mic-button');
+    const canvas = document.getElementById('visualizer');
+    const canvasCtx = canvas.getContext('2d');
+    const audioPlayback = document.getElementById('audioPlayback');
+    
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let recorded = false;
+    function toggleRecording() {
+
+        if (!isRecording && !recorded) {
+            startRecording();
+        } else {
+            recorded = true;
+            stopRecording();
+        }
+    }
+    
+    function startRecording() {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({
+            sampleRate: 16000 // Set the desired sample rate
+        });
+        navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                channelCount: 1,        // Mono audio
+                sampleRate: 16000,      // 16 kHz sample rate
+                sampleSize: 16,         // 16-bit audio
+                echoCancellation: true, // Enable echo cancellation
+                noiseSuppression: true  // Enable noise suppression
+            } 
+        })
+        .then(stream => {
+            const source = audioContext.createMediaStreamSource(stream);
+            
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+            source.connect(analyser);
+            
+            const options = {
+                mimeType: 'audio/webm;codecs=opus',
+                audioBitsPerSecond: 128000 // Set a high bitrate
+            };
+            mediaRecorder = new MediaRecorder(stream, options);
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.start();
+    
+            isRecording = true;
+            micButton.classList.add('recording');
+    
+            draw();
+        })
+        .catch(err => console.error('Error accessing microphone:', err));
+    }
+    
+    function stopRecording() {
+        mediaRecorder.stop();
+        isRecording = false;
+        micButton.classList.remove('recording');
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            
+            // Convert WebM to WAV
+            convertToWav(audioBlob).then(wavBlob => {
+                const audioUrl = URL.createObjectURL(wavBlob);
+                audioPlayback.src = audioUrl;
+    
+                // Create a FormData object and append the audio blob
+                const formData = new FormData();
+                formData.append('audio_file', wavBlob, 'recording.wav');
+                formData.append('sentence', "{{sentence}}");
+                formData.append('practice_id', "{{practice_id}}");
+                formData.append('question_num', "{{question_id}}")
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                document.getElementById('rec-success').style.display = 'block';
+                // Send the audio file to the Django backend
+                fetch('/api/record-audio/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    if (data.message && data.message.result && typeof data.message.result.overall === 'number') {
+                        const overallScore = data.message.result.overall;
+                        console.log('Overall score:', overallScore);
+                        
+                        if (overallScore >= 80) {
+                            const successElement = document.getElementById('correct');
+                            successElement.style.display = 'block';
+                        }
+                        else {
+                            const successElement = document.getElementById('incorrect');
+                            successElement.style.display = 'block';
+                        }
+
+                        
+                        
+                        // You can add more code here to use the overallScore as needed
+                        // For example, updating other parts of your UI or storing it for later use
+                    } else {
+                        console.warn('Response does not contain the expected overall score');
+                        document.getElementById('rec-success').textContent = 'Recording successful, but score not available';
+                        document.getElementById('rec-success').style.display = 'block';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+    
+                audioChunks = [];
+            });
+        };
+    }
+    
+    function convertToWav(blob) {
+        return new Promise((resolve, reject) => {
+            const fileReader = new FileReader();
+    
+            fileReader.onloadend = () => {
+                const arrayBuffer = fileReader.result;
+    
+                audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+                    const wavBlob = audioBufferToWav(audioBuffer);
+                    resolve(wavBlob);
+                }, reject);
+            };
+    
+            fileReader.onerror = reject;
+            fileReader.readAsArrayBuffer(blob);
+        });
+    }
+    
+    function audioBufferToWav(aBuffer) {
+        let numOfChan = aBuffer.numberOfChannels,
+            length = aBuffer.length * numOfChan * 2 + 44,
+            buffer = new ArrayBuffer(length),
+            view = new DataView(buffer),
+            channels = [], i, sample,
+            offset = 0,
+            pos = 0;
+    
+        // write WAVE header
+        setUint32(0x46464952);                         // "RIFF"
+        setUint32(length - 8);                         // file length - 8
+        setUint32(0x45564157);                         // "WAVE"
+    
+        setUint32(0x20746d66);                         // "fmt " chunk
+        setUint32(16);                                 // length = 16
+        setUint16(1);                                  // PCM (uncompressed)
+        setUint16(numOfChan);
+        setUint32(16000);                              // sample rate (16000 Hz)
+        setUint32(16000 * 2 * numOfChan);              // avg. bytes/sec
+        setUint16(numOfChan * 2);                      // block-align
+        setUint16(16);                                 // 16-bit
+    
+        setUint32(0x61746164);                         // "data" - chunk
+        setUint32(length - pos - 4);                   // chunk length
+    
+        // write interleaved data
+        for(i = 0; i < aBuffer.numberOfChannels; i++)
+            channels.push(aBuffer.getChannelData(i));
+    
+        while(pos < length) {
+            for(i = 0; i < numOfChan; i++) {             // interleave channels
+                sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+                sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767)|0; // scale to 16-bit signed int
+                view.setInt16(pos, sample, true);          // write 16-bit sample
+                pos += 2;
+            }
+            offset++; // next source sample
+        }
+    
+        // create Blob
+        return new Blob([buffer], {type: "audio/wav"});
+    
+        function setUint16(data) {
+            view.setUint16(pos, data, true);
+            pos += 2;
+        }
+    
+        function setUint32(data) {
+            view.setUint32(pos, data, true);
+            pos += 4;
+        }
+    }
+    
+    function draw() {
+        requestAnimationFrame(draw);
+    
+        analyser.getByteFrequencyData(dataArray);
+    
+        // Clear the canvas with a white background
+        canvasCtx.fillStyle = 'white';
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        const numberOfBars = 10; // You can adjust this number to get the desired width
+        const step = Math.floor(dataArray.length / numberOfBars);
+    
+        const barWidth = (canvas.width / numberOfBars) * 0.8; // Reduced to 80% to add some space between bars
+        const spacing = canvas.width / numberOfBars - barWidth;
+    
+        // Increase this value to make the top more rounded
+        const topRadius = barWidth / 2; // Adjust this value to change the roundness of the top
+    
+        // Set minimum bar height (e.g., 5% of canvas height)
+        const minBarHeight = canvas.height * 0.05;
+    
+        for (let i = 0; i < numberOfBars; i++) {
+            const dataIndex = i * step;
+            
+            // Scale the bar height to fit within the canvas
+            const scaleFactor = (canvas.height - minBarHeight) / 255; // 255 is the max value for Uint8Array
+            const barHeight = Math.max(
+                minBarHeight,
+                Math.min(dataArray[dataIndex] * scaleFactor + minBarHeight, canvas.height)
+            );
+    
+            const x = i * (barWidth + spacing);
+    
+            // Set the fill style to blue
+            canvasCtx.fillStyle = 'blue';
+    
+            // Draw rounded rectangle for each bar
+            canvasCtx.beginPath();
+            
+            // Bottom-left corner
+            canvasCtx.moveTo(x, canvas.height);
+            
+            // Left side
+            canvasCtx.lineTo(x, canvas.height - barHeight + topRadius);
+            
+            // Top-left corner
+            canvasCtx.quadraticCurveTo(x, canvas.height - barHeight, x + topRadius, canvas.height - barHeight);
+            
+            // Top side
+            canvasCtx.lineTo(x + barWidth - topRadius, canvas.height - barHeight);
+            
+            // Top-right corner
+            canvasCtx.quadraticCurveTo(x + barWidth, canvas.height - barHeight, x + barWidth, canvas.height - barHeight + topRadius);
+            
+            // Right side
+            canvasCtx.lineTo(x + barWidth, canvas.height);
+            
+            canvasCtx.closePath();
+            canvasCtx.fill();
+        }
+    }
+</script>
+{%else%}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentToHighlight = document.getElementById('contentToHighlight');
+        const text = contentToHighlight.innerText;
+        
+        // Assuming wordsData is available from your data structure
+        const wordsData = {{doc.result.result.words|safe}};
+      
+        // Find the min and max scores
+        const scores = wordsData.map(word => word.scores.overall);
+        const minScore = Math.min(...scores);
+        const maxScore = Math.max(...scores);
+        document.getElementById('minScore').textContent = `Lowest: ${minScore}`;
+        document.getElementById('maxScore').textContent = `Highest: ${maxScore}`;
+        const colorBar = document.getElementById('colorBar');
+        colorBar.style.background = `linear-gradient(to right, ${getColor(minScore)}, ${getColor(maxScore)})`;
+      
+        function getColor(score) {
+          if (minScore === maxScore) return 'rgba(255, 255, 0, 0.3)'; // Yellow if all scores are the same
+      
+          const percentage = (score - minScore) / (maxScore - minScore);
+          const red = Math.round(255 * (1 - percentage));
+          const green = Math.round(255 * percentage);
+          return `rgba(${red}, ${green}, 0, 0.3)`;
+        }
+      
+        function escapeHtml(unsafe) {
+          return unsafe
+               .replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
+        }
+      
+        let highlightedHTML = '';
+        let lastIndex = 0;
+      
+        wordsData.forEach((wordData, index) => {
+          // Add any characters between the last word and this one
+          if (wordData.word_parts[0].beginIndex > lastIndex) {
+            highlightedHTML += escapeHtml(text.slice(lastIndex, wordData.word_parts[0].beginIndex));
+          }
+      
+          const wordBeginIndex = wordData.word_parts[0].beginIndex;
+          const wordEndIndex = wordData.word_parts[wordData.word_parts.length - 1].endIndex;
+          const wordText = escapeHtml(text.slice(wordBeginIndex, wordEndIndex + 1));
+          const color = getColor(wordData.scores.overall);
+      
+          highlightedHTML += `<span class="highlighted-word" 
+                                    style="background-color: ${color};" 
+                                    data-score="${wordData.scores.overall}"
+                                    data-word-index="${index}">${wordText}</span>`;
+          lastIndex = wordEndIndex + 1;
+        });
+        const phonemeTableBody = document.querySelector('#phoneme tbody');
+        phonemeTableBody.innerHTML = ''; // Clear existing content
+      
+        wordsData.forEach(wordData => {
+          wordData.phonemes.forEach(phoneme => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${escapeHtml(phoneme.phoneme)}</td>
+              <td>${phoneme.pronunciation}</td>
+              <td>${escapeHtml(phoneme.sound_like)}</td>
+              <td>${phoneme.stress_mark}</td>
+            `;
+            phonemeTableBody.appendChild(row);
+          });
+        });
+        // Add any remaining text after the last word
+        if (lastIndex < text.length) {
+          highlightedHTML += escapeHtml(text.slice(lastIndex));
+        }
+      
+        contentToHighlight.innerHTML = highlightedHTML;
+      
+        // Create a single hover menu element
+        const hoverMenu = document.createElement('div');
+        hoverMenu.className = 'hover-menu';
+        document.body.appendChild(hoverMenu);
+      
+        // Function to position the hover menu right below the word
+        function positionHoverMenuBelowWord(targetElement) {
+          const rect = targetElement.getBoundingClientRect();
+          const menuRect = hoverMenu.getBoundingClientRect();
+          
+          // Calculate the left position to center the menu
+          const leftPosition = rect.left + (rect.width / 2) - (menuRect.width / 2);
+          
+          // Ensure the menu doesn't go off-screen to the left
+          const adjustedLeftPosition = Math.max(0, leftPosition);
+          
+          // Position the menu
+          hoverMenu.style.left = `${adjustedLeftPosition + window.scrollX}px`;
+          hoverMenu.style.top = `${rect.bottom + window.scrollY}px`;
+        }
+      
+        // Add hover effect
+        const words = contentToHighlight.querySelectorAll('.highlighted-word');
+        words.forEach(word => {
+          word.addEventListener('mouseenter', function(e) {
+            const score = this.dataset.score;
+            const wordIndex = this.dataset.wordIndex;
+            const wordData = wordsData[wordIndex];
+      
+            // Populate hover menu content
+            hoverMenu.innerHTML = `
+              <strong>Word: ${escapeHtml(wordData.word)}</strong><br>
+              Overall Score: ${score}<br>
+              Pronunciation: ${wordData.scores.pronunciation}<br>
+              Prominence: ${wordData.scores.prominence}<br>
+              Phonemes: ${wordData.phonemes.map(p => escapeHtml(p.phoneme)).join(', ')}
+            `;
+      
+            // Make the menu visible before positioning to get correct dimensions
+            hoverMenu.style.display = 'block';
+            
+            // Position the hover menu below the word
+            positionHoverMenuBelowWord(this);
+          });
+      
+          word.addEventListener('mouseleave', function() {
+            hoverMenu.style.display = 'none';
+          });
+        });
+      
+        // Reposition menu on window resize
+        window.addEventListener('resize', () => {
+          const activeWord = document.querySelector('.highlighted-word:hover');
+          if (activeWord && hoverMenu.style.display === 'block') {
+            positionHoverMenuBelowWord(activeWord);
+          }
+        });
+      });
+    </script>
+{%endif %}
+{% endblock %}

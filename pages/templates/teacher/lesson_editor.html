@@ -1,0 +1,53 @@
+{% extends 'writing_layout.html' %}
+{% load static %}
+{% block head %}
+<!-- Additional head specific to writing.html -->
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block content %}
+{% include "app-header.html" %}
+    <div class="row justify-content-center mt-5 ">
+        <div class="col-8">
+            <div class="card" style="min-height: 700px; display: flex; flex-direction: column; ">
+                <br>
+                <div id="root" style="max-height: 650px; overflow-y: auto;"></div>
+
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card" style="min-height: 700px">
+                <div class="chat-container" style="padding: 0; height: 100%; border-radius: 15px; overflow: hidden;">
+                    <div id="root2" style="height: 700px; overflow-y: auto; border-radius: 15px;">
+                        <!-- Your chat content here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="react-app" data-user-id="{{ user_id }}" data-qid="{{ qid }}" data-url="{{ data_url }}" data-wsurl="{{ws_url}}"></div>
+<div id="react-app2" data-user-id="{{ user_id }}" data-qid="{{ qid }}" data-url="{{ data_url }}" data-wsurl="{{ws_url}}" data-occupation = "teacher" data-prompt="default"></div>
+    {% endblock %}
+    {% block scripts %}
+    <script src="{% static '/react/static/js/main.c3f75510.js' %}"></script>
+    <script src="{% static '/react2/static/js/main.0e07f08e.js' %}"></script>
+<script type="text/javascript">
+        // Create a JavaScript variable from the Django context variable
+        const userId = '{{ user_id }}';
+        const qid = '{{ qid }}';
+        const url = '{{ data_url }}';
+        
+    </script>
+    <script type="text/javascript">
+        window.addEventListener('beforeunload', function (e) {
+            const data = new FormData();
+            data.append('user_id', userId);
+            data.append('qid', qid);
+
+            // Send the user ID with navigator.sendBeacon
+            navigator.sendBeacon('/api/user-left/', data);
+        });
+    </script>
+
+    {% endblock %}

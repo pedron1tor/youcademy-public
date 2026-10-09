@@ -1,0 +1,106 @@
+<div class="navbar-expand-lg">
+    <!-- Navbar Toggle -->
+    <button class="navbar-toggler text-white border-white-10 w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalNavMenu" aria-controls="navbarVerticalNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="d-flex justify-content-between align-items-center">
+        <span class="navbar-toggler-text text-white">Nav menu</span>
+        <span class="navbar-toggler-default">
+          <i class="bi-list"></i>
+        </span>
+        <span class="navbar-toggler-toggled">
+          <i class="bi-x"></i>
+        </span>
+      </span>
+    </button>
+    <!-- End Navbar Toggle -->
+<aside id="navbarVerticalNavMenu" class="js-navbar-vertical-aside navbar navbar-vertical navbar-vertical-absolute navbar-vertical-detached navbar-shadow navbar-collapse collapse bg-white rounded-2">
+  <div class="navbar-vertical-container">
+    <div class="navbar-vertical-footer-offset">
+      <!-- Content -->
+      <div class="navbar-vertical-content">
+        <div id="navbarVerticalMenu" class="nav nav-pills nav-vertical card-navbar-nav">
+          <!-- Dashboard Link -->
+          <div class="nav-item">
+            <a class="nav-link {% if request.path == '/student/' %}active{% endif %}" href="{% url 'student_home' %}">
+                <i class="bi-house-door nav-icon"></i>
+                <span class="nav-link-title">Dashboard</span>
+            </a>
+          </div>
+          
+          {% for course in courses %}
+            {% url 'course' course_id=course.id as course_url %}
+            {% url 'reading_menu' course_id=course.id as reading_url %}
+            {% url 'writing_menu' course_id=course.id as writing_url %}
+            {% url 'flashcards_dash' course_id=course.id as flashcards_url %}
+            {% url 'pronunciation_dash' course_id=course.id as pronunciation_url %}
+            {% with request.path as current_path %}
+            <div class="nav-item {% if current_path == course_url or current_path == reading_url or current_path == writing_url or current_path == flashcards_url %}active{% endif %}">
+                
+                <div class="d-flex align-items-center nav-item-container" style="position: relative; width: 100%;">
+                    <a class="nav-link flex-grow-1 {%if not diagnostic%} disabled{%endif%} {% if current_path == course_url or current_path == reading_url or current_path == writing_url or current_path == flashcards_url %}active{% endif %}" href="{{ course_url }}" style="display: flex; align-items: center; width: 100%;  z-index: 1;">
+                        <i class="bi-book nav-icon"></i>
+                        <span class="nav-link-title">{{ course.name }}</span>
+                        <button class="btn btn-link p-0 ms-auto" data-bs-toggle="collapse" data-bs-target="#navbarVerticalMenuCourse{{ course.id }}" aria-expanded="{% if current_path == course_url or current_path == reading_url or current_path == writing_url or current_path == flashcards_url %}true{% else %}false{% endif %}" aria-controls="navbarVerticalMenuCourse{{ course.id }}" style="z-index: 2;" onclick="event.preventDefault(); event.stopPropagation();">
+                            <i class="bi-chevron-down"></i>
+                        </button>
+                    </a>
+                    
+                </div>
+                
+                <div id="navbarVerticalMenuCourse{{ course.id }}" class="nav-collapse collapse {% if current_path == course_url or current_path == reading_url or current_path == writing_url or current_path == flashcards_url or current_path == pronunciation_url %}show{% endif %}" data-bs-parent="#navbarVerticalMenu">
+                  <a class="nav-link {% if current_path == reading_url %}active{% endif %} {%if not diagnostic%} disabled{%endif%}" href="{{ reading_url }}">Reading</a>
+                  <a class="nav-link {% if current_path == writing_url %}active{% endif %} {%if not diagnostic%} disabled{%endif%}" href="{{ writing_url }}">Writing</a>
+                  <a class="nav-link {% if current_path == flashcards_url %}active{% endif %} {%if not diagnostic%} disabled{%endif%}" href="{{ flashcards_url }}">Words</a>
+                  <a class="nav-link {% if current_path == pronunciation_url %}active{% endif %} {%if not diagnostic%} disabled{%endif%}" href="{{ pronunciation_url }}">Pronunciation</a>
+                </div>
+            </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+      <!-- End Content -->
+
+      <!-- Footer -->
+      <div class="navbar-vertical-footer">
+        <ul class="navbar-vertical-footer-list">
+            <li class="navbar-vertical-footer-list-item">
+              <!-- Style Switcher -->
+              <!-- End Style Switcher -->
+            </li>
+          
+            <li class="navbar-vertical-footer-list-item">
+              <!-- Feedback and Contact Links -->
+              <div class="dropdown dropup">
+                <button type="button" class="btn btn-ghost-secondary btn-icon rounded-circle" id="feedbackDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-dropdown-animation>
+                  <i class="bi-info-circle"></i>
+                </button>
+                <div class="dropdown-menu navbar-dropdown-menu-borderless" id="dropdownTarget"aria-labelledby="feedbackDropdown">
+                  <a class="dropdown-item" href="https://calendly.com/team-cmkp/30min">
+                    <i class="bi-telephone dropdown-item-icon"></i>
+                    <span class="text-truncate" title="Call with us">Call with us</span>
+                  </a>
+                  <a class="dropdown-item" id="startTour">
+                    <span class="text-truncate" title="Call with us">Start Tour</span>
+                  </a>
+
+                  <div class="dropdown-divider"></div>
+                  <span class="dropdown-header">Feedback</span>
+                  {% comment %} <form class="px-3" action="" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                      <textarea class="form-control" name="feedback" placeholder="Your feedback" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form> {% endcomment %}
+                </div>
+              </div>
+              <!-- End Feedback and Contact Links -->
+            </li>
+          </ul>
+          
+      </div>
+      <!-- End Footer -->
+    </div>
+  </div>
+</aside>
+</div>
+{% include "messages.html"%}

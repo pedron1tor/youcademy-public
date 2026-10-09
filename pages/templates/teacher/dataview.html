@@ -1,0 +1,428 @@
+{% extends "new_app_layout.html" %} {% block head %}
+<style>
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.card-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.card-title {
+    margin: 0;
+    font-size: 18px;
+}
+.date-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+button {
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #e0e0e0;
+}
+.calendar-widget {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.calendar-widget table {
+    border-collapse: collapse;
+}
+.calendar-widget th, .calendar-widget td {
+    padding: 5px;
+    text-align: center;
+}
+.calendar-widget td {
+    cursor: pointer;
+}
+.calendar-widget td:hover {
+    background-color: #f0f0f0;
+}
+.card-content {
+    padding: 20px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+}
+.card-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    text-align: right;
+}
+.calendar-widget td.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+
+
+<!-- Content -->
+<!-- Navbar Vertical -->
+<div class="navbar-expand-lg">
+  <!-- Navbar Toggle -->
+  <button class="navbar-toggler text-white border-white-10 w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalNavMenu" aria-controls="navbarVerticalNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="d-flex justify-content-between align-items-center">
+      <span class="navbar-toggler-text text-white">Nav menu</span>
+      <span class="navbar-toggler-default">
+        <i class="bi-list"></i>
+      </span>
+      <span class="navbar-toggler-toggled">
+        <i class="bi-x"></i>
+      </span>
+    </span>
+  </button>
+  <!-- End Navbar Toggle -->
+
+  {%include "teacher/navbar.html"%}
+</div>
+<!-- End Navbar Vertical -->
+
+<!-- Sidebar Detached Content -->
+<div class="sidebar-detached-content mt-3 mt-lg-0" style="padding-left: 8.5rem; margin-left:8.5rem;">
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="card mb-2 mb-lg-5" style="height: 400px;">
+        <div class="card-header">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h4 class="card-title">Performance Graph</h4>
+              <div class="date-controls">
+                  <button id="prevDay">&lt;</button>
+                  <button id="dateSelector">Select Date</button>
+                  <button id="nextDay">&gt;</button>
+                  <div id="calendarWidget" class="calendar-widget"></div>
+              </div>
+          </div>
+      </div>
+      <div class="card-content">
+        <canvas id="performanceChart"></canvas>
+      </div>
+      <div class="card-footer">
+          <!-- Pagination could be added here if needed -->
+      </div>
+  </div>
+    </div>
+    <div class="col-4">
+      <div class="row">
+        <div class="card" style="height: 180px;">
+          <div class="card-header">
+            <h4 class="card-header-title">Your class' average CEFR + Lexile Level</h4>
+          </div>
+          <div class="card-body">
+            <h1 id="first-data-tile">-</h1>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="card" style="height: 200px;">
+          <div class="card-header">
+            <h4 class="card-header-title">Time completing questions</h4>
+          </div>
+          <div class="card-body">
+            <h1 id="second-data-tile">-</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card mb-3 mb-lg-5" style="height: 400px;">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="row justify-content-between align-items-center flex-grow-1">
+            <div class="col-md">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-header-title">Readings</h4>
+              </div>
+            </div>
+            <!-- End Col -->
+            <div class="col-auto">
+              <!-- Filter -->
+              <div class="row align-items-sm-center">
+              </div>
+              <!-- End Filter -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+        </div>
+        <!-- End Header -->
+    
+        <!-- Table -->
+        <div class="table-responsive datatable-custom">
+          <table class="table" id="">
+            <thead>
+              <tr>
+                <th scope="col">Student Name</th>
+                <th scope="col">MPC Score</th>
+                <th scope="col">Total Score</th>
+                <th scope="col">Time</th>
+                <th scrop="col"></th>
+              </tr>
+            </thead>
+            
+              <tbody>
+                {%for reading in readings%}
+                <tr>
+                  <td>{{reading.name}}</td>
+                  <td>{{reading.mpc_grade}}</td>
+                  <td>{{reading.total_score}}</td>
+                  <td>{{reading.time}}</td>
+                  <td>
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="practice_id" value="{{ reading.practice_id }}">
+                      <button type="submit" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;" {%if not reading.graded%}disabled{%endif%}>View</button>
+                    </form>
+                  </td>
+                </tr>
+                {%endfor %}
+              </tbody>
+        
+          </table>
+          
+        </div>
+        <!-- End Table -->
+    
+        <!-- Footer -->
+        <div class="card-footer">
+          <!-- Pagination -->
+          <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+            <div class="col-sm mb-2 mb-sm-0"></div>
+            <!-- End Col -->
+            <div class="col-sm-auto">
+              <div class="d-flex justify-content-center justify-content-sm-end">
+                <!-- Pagination -->
+                <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+              </div>
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Pagination -->
+        </div>
+        <!-- End Footer -->
+      </div>
+    </div>
+    
+  </div>
+  
+</div>
+
+{% endblock %}
+{%block scripts %}
+<script>
+  const dateSelector = document.getElementById('dateSelector');
+  const prevDayBtn = document.getElementById('prevDay');
+  const nextDayBtn = document.getElementById('nextDay');
+  const firstTile = document.getElementById('first-data-tile');
+  const secondTile = document.getElementById('second-data-tile');
+  const calendarWidget = document.getElementById('calendarWidget');
+  const course_id = {{course_id}};
+  let currentDate = new Date();
+  let currentCalendarDate = new Date();
+  let performanceChart;
+  
+  function updateDateDisplay() {
+      dateSelector.textContent = currentDate.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+      });
+      fetch(`/api/get-graph-info/${course_id}/`, {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json', 
+          'X-CSRFToken': '{{csrf_token}}'
+        }, 
+        body: JSON.stringify({
+          currentDate: currentDate.toISOString().split('T')[0], 
+          course_id: course_id
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        firstTile.innerHTML=data.rating;
+        secondTile.innerHTML=`` ;
+        updateChart(data.data);
+      })
+      .catch((error) => console.error('Error:', error));
+      
+      updateButtonStates();
+  }
+  
+  function updateButtonStates() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      nextDayBtn.disabled = currentDate.getTime() === today.getTime();
+      nextDayBtn.style.opacity = nextDayBtn.disabled ? '0.5' : '1';
+      nextDayBtn.style.cursor = nextDayBtn.disabled ? 'not-allowed' : 'pointer';
+  }
+  
+  function createCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const today = new Date();
+      
+      let html = `
+          <div class="calendar-header">
+              <button id="prevMonth">&lt;</button>
+              <span>${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+              <button id="nextMonth">&gt;</button>
+          </div>
+          <table>
+              <tr>
+                  <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+              </tr>
+              <tr>
+      `;
+      
+      for (let i = 0; i < firstDay.getDay(); i++) {
+          html += '<td></td>';
+      }
+      
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+          if ((i + firstDay.getDay() - 1) % 7 === 0 && i !== 1) {
+              html += '</tr><tr>';
+          }
+          const cellDate = new Date(year, month, i);
+          const isDisabled = cellDate > today;
+          html += `<td data-date="${year}-${month+1}-${i}" ${isDisabled ? 'class="disabled"' : ''}>${i}</td>`;
+      }
+      
+      html += '</tr></table>';
+      calendarWidget.innerHTML = html;
+  
+      addCalendarEventListeners();
+  }
+  
+  function addCalendarEventListeners() {
+      document.getElementById('prevMonth').addEventListener('click', (e) => {
+          e.stopPropagation();
+          currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+          createCalendar(currentCalendarDate);
+      });
+  
+      document.getElementById('nextMonth').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const today = new Date();
+          if (currentCalendarDate.getFullYear() < today.getFullYear() ||
+              (currentCalendarDate.getFullYear() === today.getFullYear() && 
+               currentCalendarDate.getMonth() < today.getMonth())) {
+              currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+              createCalendar(currentCalendarDate);
+          }
+      });
+  
+      calendarWidget.querySelectorAll('td[data-date]').forEach(cell => {
+          cell.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (!cell.classList.contains('disabled')) {
+                  const [y, m, d] = cell.dataset.date.split('-');
+                  currentDate = new Date(y, m - 1, d);
+                  updateDateDisplay();
+                  calendarWidget.style.display = 'none';
+              }
+          });
+      });
+  }
+  
+  function initChart() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    performanceChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Performance',
+          data: [],
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+  
+  function updateChart(data) {
+    performanceChart.data.labels = Object.keys(data);
+    performanceChart.data.datasets[0].data = Object.values(data);
+    performanceChart.update();
+  }
+  
+  dateSelector.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (calendarWidget.style.display === 'none' || calendarWidget.style.display === '') {
+          currentCalendarDate = new Date(currentDate);
+          createCalendar(currentCalendarDate);
+          calendarWidget.style.display = 'block';
+      } else {
+          calendarWidget.style.display = 'none';
+      }
+  });
+  
+  prevDayBtn.addEventListener('click', () => {
+      currentDate.setDate(currentDate.getDate() - 1);
+      updateDateDisplay();
+  });
+  
+  nextDayBtn.addEventListener('click', () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (currentDate.getTime() < today.getTime()) {
+          currentDate.setDate(currentDate.getDate() + 1);
+          updateDateDisplay();
+      }
+  });
+  
+  document.addEventListener('click', (event) => {
+      if (!calendarWidget.contains(event.target) && event.target !== dateSelector) {
+          calendarWidget.style.display = 'none';
+      }
+  });
+  
+  // Initialize the chart and display initial data
+  initChart();
+  updateDateDisplay();
+  </script>
+{%endblock%}

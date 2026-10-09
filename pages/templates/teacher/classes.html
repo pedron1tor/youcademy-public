@@ -1,0 +1,104 @@
+{% extends "new_app_layout.html" %} {% block head %}
+{% endblock %} {% block content %}
+
+
+<!-- Content -->
+<!-- Navbar Vertical -->
+<div class="navbar-expand-lg">
+  <!-- Navbar Toggle -->
+  <button class="navbar-toggler text-white border-white-10 w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalNavMenu" aria-controls="navbarVerticalNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="d-flex justify-content-between align-items-center">
+      <span class="navbar-toggler-text text-white">Nav menu</span>
+      <span class="navbar-toggler-default">
+        <i class="bi-list"></i>
+      </span>
+      <span class="navbar-toggler-toggled">
+        <i class="bi-x"></i>
+      </span>
+    </span>
+  </button>
+  <!-- End Navbar Toggle -->
+
+  {%include "teacher/navbar.html"%}
+</div>
+<!-- End Navbar Vertical -->
+
+<!-- Sidebar Detached Content -->
+<div class="sidebar-detached-content mt-3 mt-lg-0" style="padding-left: 8.5rem; margin-left:8.5rem;">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card mb-3 mb-lg-5" style="height: 400px;">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="row justify-content-between align-items-center flex-grow-1">
+            <div class="col-md">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-header-title">Classes</h4>
+              </div>
+            </div>
+            <!-- End Col -->
+            <div class="col-auto">
+              <!-- Filter -->
+              <div class="row align-items-sm-center">
+              </div>
+              <!-- End Filter -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+        </div>
+        <!-- End Header -->
+    
+        <!-- Table -->
+        <div class="table-responsive datatable-custom">
+          <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
+            <thead class="thead-light">
+              <tr>
+                <th>Class name</th>
+                <th>Course Code</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for course in courses %}
+                <tr>
+                  <td>{{ course.name }}</td>
+                  <td>{{ course.course_code}}
+                  <td>
+                    <a href="{% url 'teacher_class' course_id=course.id %}" class="btn btn-primary" style="background-color: transparent; border: none; color: grey; font-size: 14px;">View Class -></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+        </div>
+        <!-- End Table -->
+    
+        <!-- Footer -->
+        <div class="card-footer">
+          <!-- Pagination -->
+          <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+            <div class="col-sm mb-2 mb-sm-0"></div>
+            <!-- End Col -->
+            <div class="col-sm-auto">
+              <div class="d-flex justify-content-center justify-content-sm-end">
+                <!-- Pagination -->
+                <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+              </div>
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Pagination -->
+        </div>
+        <!-- End Footer -->
+      </div>
+    </div>
+    
+  </div>
+  
+</div>
+<!-- End Sidebar Detached Content -->
+
+<!-- End Content -->
+{% endblock %}

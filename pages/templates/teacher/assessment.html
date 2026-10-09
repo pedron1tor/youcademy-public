@@ -1,0 +1,577 @@
+{% extends "new_app_layout.html" %} {% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+
+
+<!-- Content -->
+<!-- Navbar Vertical -->
+<div class="navbar-expand-lg">
+  <!-- Navbar Toggle -->
+  <button class="navbar-toggler text-white border-white-10 w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalNavMenu" aria-controls="navbarVerticalNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="d-flex justify-content-between align-items-center">
+      <span class="navbar-toggler-text text-white">Nav menu</span>
+      <span class="navbar-toggler-default">
+        <i class="bi-list"></i>
+      </span>
+      <span class="navbar-toggler-toggled">
+        <i class="bi-x"></i>
+      </span>
+    </span>
+  </button>
+  <!-- End Navbar Toggle -->
+
+  {%include "teacher/navbar.html"%}
+</div>
+<!-- End Navbar Vertical -->
+
+<!-- Sidebar Detached Content -->
+<div class="sidebar-detached-content mt-3 mt-lg-0" style="padding-left: 8.5rem; margin-left:8.5rem;">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card mb-3 mb-lg-5" style="height: 260px;">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="row justify-content-between align-items-center flex-grow-1">
+            <div class="col-md">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-header-title">Progress</h4>
+              </div>
+            </div>
+            <!-- End Col -->
+            <div class="col-auto">
+              <!-- Filter -->
+              <div class="row align-items-sm-center">
+                
+              </div>
+              <!-- End Filter -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+        </div>
+        <!-- End Header -->
+    
+        <!-- Table -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="d-flex justify-content-center">
+              <div class="chart-container" style="height: 200px; width: 100%; max-width: 400px;">
+                <canvas id="realtimeChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex justify-content-center">
+              <div class="chart-container" style="height: 200px; width: 100%; max-width: 400px;">
+                <canvas id="realtimeCharttwo"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Table -->
+    
+        <!-- Footer -->
+        <div class="card-footer">
+          <!-- Pagination -->
+          <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+            <div class="col-sm mb-2 mb-sm-0"></div>
+            <!-- End Col -->
+            <div class="col-sm-auto">
+              <div class="d-flex justify-content-center justify-content-sm-end">
+                <!-- Pagination -->
+                <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+              </div>
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Pagination -->
+        </div>
+        <!-- End Footer -->
+      </div>
+      <div class="card mb-3 mb-lg-5" style="height: 260px;">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="row justify-content-between align-items-center flex-grow-1">
+            <div class="col-md">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-header-title">Status</h4>
+              </div>
+            </div>
+            <!-- End Col -->
+            <div class="col-auto">
+              <!-- Filter -->
+              <div class="row align-items-sm-center">
+                
+              </div>
+              <!-- End Filter -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+        </div>
+        <!-- End Header -->
+    
+        <!-- Table -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+              <table class="table" style="border: 3px solid #28a745;" id="working">
+                <thead>
+                  <tr>
+                    <th scope="col">Student working without any issues</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+              <table class="table" style="border: 3px solid #dc3545;" id="left-tab">
+                <thead>
+                  <tr>
+                    <th scope="col">Student is on a different tab for more than 5 seconds</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+              <table class="table" style="border: 3px solid #007bff;" id="help">
+                <thead>
+                  <tr>
+                    <th scope="col">The student has asked for help</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="table-responsive" style="height: 200px; overflow-y: auto;">
+              <table class="table" style="border: 3px solid #ffc107;" id="suggest-help">
+                <thead>
+                  <tr>
+                    <th scope="col">We think the student could use some help</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+        <!-- End Table -->
+    
+        <!-- Footer -->
+        <div class="card-footer">
+          <!-- Pagination -->
+          <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+            <div class="col-sm mb-2 mb-sm-0"></div>
+            <!-- End Col -->
+            <div class="col-sm-auto">
+              <div class="d-flex justify-content-center justify-content-sm-end">
+                <!-- Pagination -->
+                <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+              </div>
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Pagination -->
+        </div>
+        <!-- End Footer -->
+      </div>
+    </div>
+    
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card mb-3 mb-lg-5" style="height: 400px;">
+        <!-- Header -->
+        <div class="card-header">
+          <div class="row justify-content-between align-items-center flex-grow-1">
+            <div class="col-md">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-header-title">Your Student's actions </h4>
+              </div>
+            </div>
+            <!-- End Col -->
+            <div class="col-auto">
+              <!-- Filter -->
+              <div class="row align-items-sm-center">
+                <!-- Existing Code Here -->
+                <!-- New Dropdowns and Button -->
+                <div class="col-auto">
+                  <select class="js-select form-select" id="global_cefr_rating">
+                    <option value="">Drill down by:</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <select class="js-select form-select" id="global_level">
+                    <option value="">Select Level</option>
+                    <option value="1">Low</option>
+                    <option value="2">Intermediate</option>
+                    <option value="3">Advanced</option>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <button class="btn btn-outline-primary" id="set_all_button">Set Filters</button>
+                </div>
+                <!-- End New Dropdowns and Button -->
+              </div>
+              <!-- End Filter -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+        </div>
+        <!-- End Header -->
+    
+        <!-- Table -->
+        <div class="table-responsive datatable-custom">
+          <table class="table" id="main-table">
+            <thead>
+              <tr>
+                <th scope="col">Student Name</th>
+                <th scope="col">Message</th>
+                <th scope="col">Action</th>
+                <th scope="col">Time</th>
+              </tr>
+            </thead>
+            
+              <tbody>
+                
+              </tbody>
+        
+          </table>
+        </div>
+        <!-- End Table -->
+    
+        <!-- Footer -->
+        <div class="card-footer">
+          <!-- Pagination -->
+          <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+            <div class="col-sm mb-2 mb-sm-0"></div>
+            <!-- End Col -->
+            <div class="col-sm-auto">
+              <div class="d-flex justify-content-center justify-content-sm-end">
+                <!-- Pagination -->
+                <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+              </div>
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Pagination -->
+        </div>
+        <!-- End Footer -->
+      </div>
+    </div>
+    
+  </div>
+  
+</div>
+<!-- End Sidebar Detached Content -->
+
+<!-- End Content -->
+{% endblock %}
+{%block scripts%}
+<script>
+  const ctx = document.getElementById('realtimeChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['query','reading', 'questions', 'finished'],
+      datasets: [{
+        label: 'Assessment Progress',
+        data: [0, 0, 0,0], // Initialize with zeros
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          type: 'category',
+          labels: ['Query','Reading', 'Questions', 'Completed Assessment'],
+          title: {
+            display: false,
+            text: 'Assessment Progress'
+          }
+        },
+        y: {
+          min: 0,
+          max: 10,
+          ticks: {
+            stepSize: 1
+          },
+          title: {
+            display: true,
+            text: 'Number of Students'
+          }
+        }
+      }
+    }
+  });
+</script>
+<script>
+  const ctx2 = document.getElementById('realtimeCharttwo').getContext('2d');
+  const chart2 = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: ['reading', 'questions',],
+      datasets: [{
+        label: 'Average Time to Complete Items',
+        data: [0, 0, 0], // Initialize with zeros
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          type: 'category',
+          labels: ['Reading', 'Questions'],
+          title: {
+            display: false,
+            text: ''
+          }
+        },
+        y: {
+          min: 0,
+          max: 8,
+          ticks: {
+            stepSize: 2
+          },
+          title: {
+            display: true,
+            text: 'Time (minutes)'
+          }
+        }
+      }
+    }
+  });
+</script>
+<script>
+// Object to store each student's current state
+const studentStates = {};
+const studentStates2 = {};
+const studentTimes = {}; // Object to store timestamps for each student
+
+// WebSocket connection
+const courseId = "{{ course_id }}";
+const socket = new WebSocket(
+  'wss://' + window.location.host +
+  '/ws/assessment/' + courseId + '/'
+);
+
+socket.onmessage = function(e) {
+  const data = JSON.parse(e.data);
+  if (data.message && data.message.name && data.message.action) {
+    updateStudentState(data.message.name, data.message.action, data.message.message, data.message.time);
+  }
+};
+
+socket.onclose = function(e) {
+  console.error('Assessment socket closed unexpectedly');
+};
+
+function updateStudentState(studentName, newAction, message, time) {
+  const validActions = ['query', 'reading', 'help', 'suggested_help', 'questions', 'finished', 'left_tab', 'returned_tab'];
+  const validActions2 = ['query', 'reading', 'questions', 'finished'];
+  newAction = newAction.toLowerCase();
+
+  if (!validActions.includes(newAction)) {
+    console.error('Invalid action:', newAction);
+    return;
+  }
+
+  const oldAction = studentStates[studentName];
+  const oldAction2 = studentStates2[studentName];
+  console.log(`Updating state for ${studentName}: ${oldAction} -> ${newAction}`);
+
+  // Only update if the action is different
+  if (oldAction !== newAction) {
+    // Update the student's state
+    studentStates[studentName] = newAction;
+
+    // Update tables based on the action
+    updateTables(studentName, newAction);
+    updateTables2(studentName, newAction);
+    if (validActions2.includes(newAction)) {
+      studentStates2[studentName] = newAction;
+      updateChart(oldAction2, newAction);
+    }
+
+    // Update student times and compute averages
+    updateStudentTimes(studentName, newAction, time);
+  }
+
+  // Add the action to the main table (even if it's the same action)
+  addStudentRow(studentName, newAction, new Date(time).toLocaleTimeString(), message);
+}
+
+function updateStudentTimes(studentName, action, time) {
+  if (!studentTimes[studentName]) {
+    studentTimes[studentName] = {
+      questionTimes: []
+    };
+  }
+
+  const timestamp = new Date(time).getTime();
+
+  if (action === 'reading' && !studentTimes[studentName].readingStart) {
+    studentTimes[studentName].readingStart = timestamp;
+  } else if (action === 'questions') {
+    if (!studentTimes[studentName].questionsStart) {
+      studentTimes[studentName].questionsStart = timestamp;
+      if (studentTimes[studentName].readingStart) {
+        const readingTime = (timestamp - studentTimes[studentName].readingStart) / 60000; // Convert to minutes
+        updateReadingAverage(readingTime);
+      }
+    } else {
+      const questionTime = (timestamp - studentTimes[studentName].questionsStart) / 60000; // Convert to minutes
+      studentTimes[studentName].questionTimes.push(questionTime);
+      updateQuestionsAverage(questionTime);
+      studentTimes[studentName].questionsStart = timestamp; // Reset for next question
+    }
+  }
+}
+
+let readingTotal = 0;
+let readingCount = 0;
+let questionsTotal = 0;
+let questionsCount = 0;
+
+function updateReadingAverage(time) {
+  readingTotal += time;
+  readingCount++;
+  const average = readingTotal / readingCount;
+  updateChart2(average, null, null);
+}
+
+function updateQuestionsAverage(time) {
+  questionsTotal += time;
+  questionsCount++;
+  const averageQuestionTime = questionsTotal / questionsCount;
+  
+  // Calculate overall average time between "questions" events
+  let overallQuestionAverage = 0;
+  let totalQuestions = 0;
+  for (let student in studentTimes) {
+    if (studentTimes[student].questionTimes.length > 0) {
+      overallQuestionAverage += studentTimes[student].questionTimes.reduce((a, b) => a + b, 0);
+      totalQuestions += studentTimes[student].questionTimes.length;
+    }
+  }
+  overallQuestionAverage = overallQuestionAverage / totalQuestions;
+  
+  updateChart2(null, averageQuestionTime, overallQuestionAverage);
+}
+
+function updateChart2(readingAvg, averageQuestionTime, overallQuestionAverage) {
+  if (readingAvg !== null) {
+    chart2.data.datasets[0].data[0] = readingAvg;
+  }
+  if (averageQuestionTime !== null) {
+    chart2.data.datasets[0].data[1] = averageQuestionTime;
+  }
+  if (overallQuestionAverage !== null) {
+    chart2.data.datasets[0].data[2] = overallQuestionAverage;
+  }
+  chart2.update();
+}
+
+function updateTables(studentName, newAction) {
+  const workingTable = document.querySelector('#working tbody');
+  const leftTabTable = document.querySelector('#left-tab tbody');
+
+  // Remove student from all tables
+  removeStudentFromTable(studentName, workingTable);
+  removeStudentFromTable(studentName, leftTabTable);
+
+  // Add student to the appropriate table
+  if (newAction === 'left_tab') {
+    addStudentToTable(studentName, leftTabTable);
+  } else {
+    addStudentToTable(studentName, workingTable);
+  }
+}
+
+function updateTables2(studentName, newAction) {
+  const helpTable = document.querySelector('#help tbody');
+  const suggestHelpTable = document.querySelector('#suggest-help tbody');
+  if (newAction === 'help') {
+    addStudentToTable(studentName, helpTable);
+  } else if (newAction === 'suggested_help'){
+    addStudentToTable(studentName, suggestHelpTable);
+  }
+}
+
+function removeStudentFromTable(studentName, tableBody) {
+  const rows = tableBody.querySelectorAll('tr');
+  rows.forEach(row => {
+    if (row.textContent.includes(studentName)) {
+      row.remove();
+    }
+  });
+}
+
+function addStudentToTable(studentName, tableBody) {
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `<td>${studentName}</td>`;
+  tableBody.appendChild(newRow);
+}
+
+function updateChart(oldAction, newAction) {
+  const validChartActions = ['query', 'reading', 'questions', 'finished'];
+  
+  console.log(`Updating chart: ${oldAction} -> ${newAction}`);
+  console.log('Chart data before update:', [...chart.data.datasets[0].data]);
+
+  if (validChartActions.includes(newAction) && oldAction !== newAction) {
+    const newIndex = validChartActions.indexOf(newAction);
+    chart.data.datasets[0].data[newIndex]++;
+    console.log(`Incremented ${newAction} count`);
+    
+    chart.update();
+  }
+
+  console.log('Chart data after update:', [...chart.data.datasets[0].data]);
+}
+
+function addStudentRow(studentName, action, time, message) {
+  const tableBody = document.querySelector('#main-table tbody');
+  const newRow = document.createElement('tr');
+  
+  newRow.innerHTML = `
+    <td>${studentName}</td>
+    <td>${message}</td>
+    <td>${action}</td>
+    <td>${time}</td>
+  `;
+  
+  tableBody.appendChild(newRow);
+}
+
+// Assuming the chart is already initialized elsewhere in your code
+// If not, you need to add the chart initialization code here
+</script>
+  {% endblock %}

@@ -1,0 +1,131 @@
+{% extends "new_app_layout.html" %} {% block head %}
+<style>
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .thead-light {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+  }
+</style>
+{% endblock %} {% block content %}
+
+
+<!-- Content -->
+  <!-- Navbar Vertical -->
+ {%include "student/navbar.html"%}
+  <!-- End Navbar Vertical -->
+
+  <!-- Sidebar Detached Content -->
+  <div class="sidebar-detached-content mt-3 mt-lg-0" style="padding-left: 8.5rem; margin-left:8.5rem;">
+    <div class="card card-hover-shadow h-100" >
+      <div class="card-body">
+    
+    <!-- End Stats -->
+
+    
+    <!-- End Row -->
+
+    <!-- Card -->
+    <div class="card mb-3 mb-lg-5" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="row justify-content-between align-items-center flex-grow-1">
+          <div class="col-md">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="card-header-title">Pronunciation Lessons History</h4>
+            </div>
+          </div>
+          <!-- End Col -->
+      
+          <div class="col-auto">
+            <!-- Filter -->
+            <div class="row align-items-sm-center">
+              <!-- Existing Code Here -->
+              <div class="col-auto">
+                <form method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary" name="new_running_record" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black; ">Running Record</button>
+                </form>
+              </div>
+              <!-- New Button -->
+              <div class="col-auto">
+                <form method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary" name="create_new" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black; ">Practice!</button>
+                </form>
+              </div>
+              <!-- End New Button -->
+            </div>
+            <!-- End Filter -->
+          </div>
+          <!-- End Col -->
+        </div>
+        <!-- End Row -->
+      </div>
+      <!-- End Header -->
+      <!-- Table -->
+      <div class="table-responsive datatable-custom" style="max-height: 400px; overflow-y: auto;">
+        <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table" data-hs-datatables-options='{
+                 "columnDefs": [{
+                    "targets": [0, 1, 4],
+                    "orderable": false
+                  }],
+                 "order": [],
+                 "info": {
+                   "totalQty": "#datatableWithPaginationInfoTotalQty"
+                 },
+                 "search": "#datatableSearch",
+                 "entries": "#datatableEntries",
+                 "pageLength": 8,
+                 "isResponsive": false,
+                 "isShowPaging": false,
+                 "pagination": "datatablePagination"
+               }'>
+          <thead class="thead-light" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">
+            <tr>
+              <th>Title</th>
+              <th>Created At</th>
+              <th>Last viewed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for deck in sessions %}
+                  <tr>
+                    <td>{{ deck.title  }}</td>
+                    <td>{{ deck.created_at }}</td>
+                    <td>{{ deck.last_viewed }}</td>
+                    <td>
+                    <form method=post>
+                      {% csrf_token %}
+                      <input type="hidden" name="practice_id" value="{{ deck.practice_id }}">
+                      <button type="submit" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;" {%if not deck.reviewed %}disabled{%endif%}>View</button>
+                    </form>
+                  </td>
+                  </tr>
+                  {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <!-- End Table -->
+      <!-- Footer -->
+      <div class="card-footer">
+        <!-- Pagination -->
+        
+        <!-- End Pagination -->
+      </div>
+      <!-- End Footer -->
+    </div>
+  </div>
+</div>
+  </div>
+  <!-- End Sidebar Detached Content -->
+
+<!-- End Content -->
+
+
+{% endblock %}

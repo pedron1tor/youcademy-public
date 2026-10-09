@@ -1,0 +1,127 @@
+@startuml
+!theme plain
+
+class CustomUser {
+    +username: string
+    +email: string
+    +name: string
+    +occupation: string
+    +metrics: Metrics
+    +diagnostic: boolean
+}
+
+
+class Metrics {
+    +date: datetime
+    +student: CustomUser
+    +course: Course
+    +test_readiness_score: float
+    +areas_of_strugle: json
+    +estimated_lexile_level: int
+    +estimated_cefr_rating: str
+    +estimated_level: str
+    +confidence_score: float
+    +reading_speed: float
+    +quiz_score_average: float
+    +average_reading_time: float
+    +average_questions_time: float
+    +average_length_highlights: float
+    +average_highlights: float
+    +average_removed_highlights: float
+    +average_unknown_words: float
+    +average_questions_asked: float
+    +story_elements_score: float
+    +problem_solution: float
+    +poetry: float
+    +main_idea: float
+    +compare_and_contrast: float
+    +identifying_genre: float
+    +sequences: float
+    +explicit_details: float
+    +cause_effect: float
+    +descriptive: float
+    +implicit_details: float
+    +location_details: float
+    
+}
+class RawData{
++date: datetime
++student: CustomUser
++course: Course
++practice_session: PracticeSession
++removed_highlights: int
++notes:Notes 
++number_highlights: int
++number_uknown_words: int
++avg_length_highlights: float
++reading: boolean
++right_answers: int
++total_questions: int
++missing_answers: int
++order_answers: str
+}
+
+class Course {
+    +name: string
+    +description: string
+    +course_code: string
+    +teacher: CustomUser
+    +students: CustomUser[]
+}
+
+class PracticeSessions {
+    +date: datetime
+    +course: Course
+    +strategy: Strategy
+}
+
+class Strategy {
+    +name: string
+    +description: string
+}
+
+class Notes {
+    +date: datetime
+    +pink_highlights: json
+    +yellow_highlights: json
+    +notes: text
+    +reading: text
+    +student: CustomUser
+}
+
+class MCQuestions {
+    +date: datetime
+    +question: text
+    +response: text
+    +answer: text
+    +correct: boolean
+    +student: CustomUser
+}
+
+class OpenQuestions {
+    +date: datetime
+    +question: text
+    +response: text
+    +feedback: text
+    +student: CustomUser
+}
+
+class Readings{
+
+
++title: str
++text: str
+}
+
+CustomUser "1" -- "many" Metrics : has >
+CustomUser "1" -- "many" Course : teacher has >
+Course "1" -- " many" CustomUser : has students >
+Course "1" -- "many" PracticeSessions : includes >
+PracticeSessions "1" -- "many" Strategy : uses >
+Notes "many" -- "1" RawData : has <
+RawData "1" -- "many" Readings: has >
+RawData "1" -- "many" MCQuestions: has >
+RawData "1" -- "many" OpenQuestions: has >
+ 
+CustomUser "1" -- "many" RawData : has >
+@enduml

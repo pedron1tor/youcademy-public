@@ -1,0 +1,176 @@
+{% extends "new_app_layout.html" %}
+{%load static%}
+{% block head %}
+<style>
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .thead-light {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Content -->
+<!-- Navbar Vertical -->
+{%include "student/navbar.html"%}
+<!-- End Navbar Vertical -->
+
+<!-- Sidebar Detached Content -->
+<div class="sidebar-detached-content mt-3 mt-lg-0" style=" padding-left: 8.5rem; margin-left:8.5rem;">
+
+  <div class="card card-hover-shadow h-100" >
+    <div class="card-body">
+  <!-- Card -->
+  <div class="card mb-3 mb-lg-5" style="border:1px solid; border-color:#d3d3d3; position: relative;">
+    <!-- Header -->
+    <div class="card-header">
+      <div class="row justify-content-between align-items-center flex-grow-1">
+        <div class="col-md">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-header-title">Reading History</h4>
+          </div>
+        </div>
+        <!-- End Col -->
+        <div class="col-auto">
+          <!-- Filter -->
+          <div class="row align-items-sm-center">
+            <!-- New Button -->
+            <div class="col-auto">
+                <a id="createNew" href="{% url 'query' course_id=course_id %}" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;">
+                    Create New Reading
+                </a>
+            </div>
+            <!-- End New Button -->
+          </div>
+          <!-- End Filter -->
+        </div>
+        <!-- End Col -->
+      </div>
+      <!-- End Row -->
+    </div>
+    <!-- End Header -->
+    <!-- Table -->
+    <div class="table-responsive datatable-custom" style="max-height: 400px; overflow-y: auto;">
+      <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table" data-hs-datatables-options='{
+               "columnDefs": [{
+                  "targets": [0, 1, 4],
+                  "orderable": false
+                }],
+               "order": [],
+               "info": {
+                 "totalQty": "#datatableWithPaginationInfoTotalQty"
+               },
+               "search": "#datatableSearch",
+               "entries": "#datatableEntries",
+               "pageLength": 8,
+               "isResponsive": false,
+               "isShowPaging": false,
+               "pagination": "datatablePagination"
+             }'>
+        <thead class="thead-light" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">
+          <tr>
+            <th>Title</th>
+            <th>Lexile Level</th>
+            <th>Word Count</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reading in texts %}
+          <tr>
+            <td>{{ reading.title }}</td>
+            <td>{{ reading.lexile_level }}</td>
+            <td>{{ reading.word_count }}</td>
+            <td>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="practice_id" value="{{ reading.practice_id }}">
+                <button type="submit" class="btn btn-primary" style="border:1px solid; border-color:#d3d3d3; background-color: white; color: black;" {%if not reading.graded%}disabled{%endif%}>View</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- End Table -->
+    <!-- Footer -->
+    <div class="card-footer">
+      <!-- Pagination -->
+      <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+        <div class="col-sm mb-2 mb-sm-0">
+        </div>
+        <!-- End Col -->
+        <div class="col-sm-auto">
+          <div class="d-flex justify-content-center justify-content-sm-end">
+            <!-- Pagination -->
+            <nav id="datatablePagination" aria-label="Activity pagination"></nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Declare global variables with Django template variables
+  window.djangoData = {
+      lastCourseId: "{{ course_id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const createWritingModal = document.getElementById('createWriting');
+
+    function addDefaultOption(promptsSelect) {
+      const defaultOption = document.createElement('option');
+      defaultOption.text = 'Default';
+      defaultOption.value = 'default';
+      promptsSelect.add(defaultOption);
+    }
+
+    function fetchAndPopulatePrompts(courseName) {
+      fetch(`/api/get_prompts/?course_name=${courseName}`)
+        .then(response => response.json())
+        .then(data => {
+          const promptsSelect = document.getElementById('course_prompts');
+          promptsSelect.innerHTML = '';
+          addDefaultOption(promptsSelect);
+          data.prompts.forEach(prompt => {
+            const option = document.createElement('option');
+            const truncatedPrompt = prompt.prompt.length > 20 ? prompt.prompt.substring(0, 20) + '...' : prompt.prompt;
+            option.text = `${prompt.name}: ${truncatedPrompt}`;
+            option.value = prompt.prompt;
+            promptsSelect.add(option);
+          });
+        });
+    }
+
+    createWritingModal.addEventListener('shown.bs.modal', function() {
+      const courseName = document.getElementById('course_name').value;
+      if (courseName) {
+        fetchAndPopulatePrompts(courseName);
+      }
+    });
+
+    document.getElementById('course_name').addEventListener('change', function() {
+      const courseName = this.value;
+      if (courseName) {
+        fetchAndPopulatePrompts(courseName);
+      }
+    });
+  });
+</script>
+{% endblock %}
+

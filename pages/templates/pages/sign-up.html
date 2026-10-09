@@ -1,0 +1,175 @@
+{%load static %}
+{% load socialaccount %}
+<!doctype html>
+<html lang="en">
+  <head>
+    {%include "tagmanager1.html"%}
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Sign Up - Youcademy</title>
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="shortcut icon" type="image/x-icon">
+    <link href="{% static 'webflow/images/yc.jpeg' %}" rel="apple-touch-icon">
+    <!-- CSS files -->
+    {% include 'pages/headfiles.html' %}
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      :root {
+        --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+      }
+      body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+      }
+    </style>
+    <style>
+      .requirement-list {
+        display: none;
+      }
+      .requirement-list li {
+        list-style-type: none;
+        padding-left: 20px;
+        position: relative;
+      }
+      .requirement-list li::before {
+        content: '✗';
+        position: absolute;
+        left: 0;
+      }
+      .requirement-list li.valid::before {
+        content: '✓';
+      }
+    </style>
+    {% load static %}
+  </head>
+  <body class="d-flex flex-column">
+    {%include "tagmanager2.html"%}
+    <script src="{% static 'dist/js/demo-theme.min.js' %}"></script>
+    <div class="page page-center">
+      <div class="container container-tight py-4">
+        <div class="text-center mb-4">
+          <a href="/" class="navbar-brand navbar-brand-autodark"><img src="{% static 'webflow/images/Untitled-design.svg' %}" height="36" alt=""></a>
+        </div>
+        {% include 'messages.html' %}
+        <div class="card card-md">
+          <div class="card-body">
+            <form method="post" autocomplete="off">
+              {% csrf_token %}
+              <h2 class="card-title text-center mb-4">Create new account</h2>
+              <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" placeholder="Enter name" name="name" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Occupation</label>
+                <div class="form-check form-check-inline">
+                  <input type="radio" class="form-check-input" name="occupation" value="student" id="student" required>
+                  <label class="form-check-label" for="student">Student</label>
+                </div>
+                {% comment %} <div class="form-check form-check-inline">
+                  <input type="radio" class="form-check-input" name="occupation" value="teacher" id="teacher" required>
+                  <label class="form-check-label" for="teacher">Teacher</label>
+                </div> {% endcomment %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" placeholder="Enter username" name="username" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email address</label>
+                <input type="email" class="form-control" placeholder="Enter email" name="email" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group input-group-flat">
+                  <input type="password" class="form-control" placeholder="Password" autocomplete="off" name="pwd" id="password" required>
+                  <span class="input-group-text">
+                    <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip" onclick="togglePassword()">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
+                    </a>
+                  </span>
+                </div>
+                <div class="mt-2 small text-muted requirement-list" id="password-requirements">
+                  <p>Password requirements:</p>
+                  <ul>
+                    <li id="length">At least 8 characters long</li>
+                    <li id="lowercase">Contains a lowercase letter</li>
+                    <li id="uppercase">Contains an uppercase letter</li>
+                    <li id="number">Contains a number</li>
+                    <li id="special">Contains a special character</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-check">
+                  <input type="checkbox" class="form-check-input" name="terms" required/>
+                  <span class="form-check-label">Agree the <a href="#" tabindex="-1">terms and policy</a>.</span>
+                </label>
+              </div>
+              <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">Create new account</button>
+              </div>
+              
+              <div class="d-grid mt-2">  
+                <a href="{% provider_login_url 'google' %}" class="btn btn-primary" style="background-color:black;"onmouseover=" this.style.backgroundColor='#4A4A4A';" onmouseout="this.style.backgroundColor='black';">
+                    <img src="{% static 'google.svg' %}" alt="google" style="width: 20px; height: 20px; margin-right: 5px;">
+                    Sign up with Google
+                </a>
+              </div>
+             <div class="d-grid mt-2">
+              <a href="{% provider_login_url 'microsoft' %}" class="btn btn-primary" style="background-color: white; color: black; border: 1px solid black; display: inline-flex; align-items: center; text-decoration: none; font-family: Arial, sans-serif; transition: background-color 0.3s, color 0.3s;" onmouseover="this.style.backgroundColor='#f0f0f0';" onmouseout="this.style.backgroundColor='white';">
+                <img src="{% static 'microsoft.svg' %}" alt="Microsoft logo" style="width: 20px; height: 20px; margin-right: 10px;">
+                Log in with Microsoft
+            </a>
+            </form>
+          </div>
+          <div class="text-center text-muted mt-3">
+            Already have account? <a href="/pages/login" tabindex="-1">Sign in</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- Libs JS -->
+    <!-- Tabler Core -->
+    <script src="{% static 'dist/js/tabler.min.js' %}" defer></script>
+    <script src="{% static 'dist/js/demo.min.js' %}" defer></script>
+    <script>
+      function togglePassword() {
+        var passwordField = document.getElementById('password');
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+        } else {
+          passwordField.type = 'password';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const requirements = document.getElementById('password-requirements');
+        const length = document.getElementById('length');
+        const lowercase = document.getElementById('lowercase');
+        const uppercase = document.getElementById('uppercase');
+        const number = document.getElementById('number');
+        const special = document.getElementById('special');
+
+        passwordInput.addEventListener('input', function() {
+          const password = this.value;
+
+          // Show requirements when user starts typing
+          if (password.length > 0) {
+            requirements.style.display = 'block';
+          } else {
+            requirements.style.display = 'none';
+          }
+
+          // Check each requirement
+          length.classList.toggle('valid', password.length >= 8);
+          lowercase.classList.toggle('valid', /[a-z]/.test(password));
+          uppercase.classList.toggle('valid', /[A-Z]/.test(password));
+          number.classList.toggle('valid', /\d/.test(password));
+          special.classList.toggle('valid', /[!@#$%^&*(),.?":{}|<>]/.test(password));
+        });
+      });
+    </script>
+  </body>
+</html>

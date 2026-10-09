@@ -1,0 +1,429 @@
+{% extends "new_app_layout.html" %}
+{%load static %}
+{% block head %}
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+  } 
+  .card-dashboard {
+    border: 1px solid #d3d3d3;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  .card-dashboard:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: auto repeat(7, 1fr);
+    gap: 1px;
+    background-color: #e0e0e0;
+  } 
+  .schedule-grid > div {
+    background-color: #ffffff;
+    padding: 0.5rem;
+    min-height: 2rem;
+  }
+  .schedule-header {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-time {
+    font-weight: bold;
+    text-align: right;
+    background-color: #f0f0f0 !important;
+  }
+  .schedule-cell {
+    cursor: pointer;
+  }
+  .schedule-cell:hover {
+    background-color: #f0f0f0;
+  }
+  .course-table {
+    width: 100%;
+  }
+  .course-table th:last-child,
+  .course-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+  }
+  .course-table td {
+    vertical-align: middle;
+  }
+  .course-action {
+    display: flex;
+    justify-content: flex-end;
+  }
+.streak-card:first-child {
+    margin-bottom: 1rem;
+}
+.task-list {
+  text-align: right;
+}
+
+.streak-card .card-body {
+  padding: 1rem 1rem 1rem 1rem;
+}
+.card-dashboard {
+  height: 100%;
+}
+.card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+.task-list {
+  flex-grow: 1;
+  text-align: right;
+}
+.button-container {
+  display: flex;
+  align-items: flex-end;
+  padding-left: 1rem;
+}
+.streak-card {
+  height: calc(50% - 0.5rem);
+}
+.streak-card:first-child {
+  margin-bottom: 1rem;
+}
+
+#streak-counter {
+  font-weight: bold;
+}
+.hover-menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+.btn-wrapper:hover .hover-menu {
+  display: block;
+}
+a.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+<style>
+  .course-slider-container {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;  /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  }
+  .course-slider-container::-webkit-scrollbar {
+    display: none;  /* For Chrome, Safari, and Opera */
+}
+  .course-slider {
+      display: flex;
+      gap: 20px;
+  }
+  .course-card {
+      flex: 0 0 calc(50% - 10px);
+      height: 380px;
+      background-color: #DDDDDD;
+      border-radius: 20px;
+      position: relative;
+  }
+  .course-title {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: black;
+      font-family: 'Lato', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+  }
+  .continue-btn {
+      padding: 8px 24px;
+      background-color: #000000;
+      color: #FFFFFF;
+      border: 1px solid #000000;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      position: absolute;
+      bottom: 5%;
+      right: 5%;
+  }
+  .continue-btn:hover {
+      background-color: #333333;
+  }
+  .paragraphs {
+    font-size: 18px; /* Increase font size */
+    color: #000000; /* Make text color darker (black) */
+    font-weight: 500; /* Make font slightly bolder */
+    line-height: 1.6; /* Improve readability with increased line height */
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="height:385px;">
+</div>
+<div class="row">
+  <div class="col-9">
+    <h1>Lorum Ipsum</h1>
+    <div class="paragraphs"> 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ut rhoncus orci, eu fringilla massa. Nam blandit congue cursus. Sed tellus lorem, feugiat sit amet purus quis, gravida auctor enim. Sed placerat non libero non dapibus. Nulla facilisi. Phasellus orci odio, gravida ultricies condimentum in, congue at metus. Nulla non interdum arcu. Etiam suscipit eu turpis ac ultricies. Suspendisse accumsan nulla in nibh venenatis, a maximus ligula lobortis.
+
+Donec at mollis ipsum. Morbi sit amet ex id enim eleifend congue. Fusce imperdiet facilisis tortor, quis pulvinar sem molestie vel. Praesent non sapien ultricies, posuere diam ut, finibus leo. Morbi urna mauris, lobortis at euismod sed, scelerisque a diam. Mauris molestie turpis diam, eu venenatis nisi euismod eget. Donec maximus accumsan orci, id pharetra tellus tincidunt quis. Nullam nec turpis viverra, varius lacus vel, consectetur nunc.
+
+Cras pretium ante quis velit luctus, ut laoreet lacus dapibus. Nam ut pellentesque quam, nec mattis tellus. Donec viverra at ligula porta porta. Suspendisse ut mauris odio. Nullam ut dolor ac eros dignissim aliquet. Mauris ullamcorper dignissim turpis eget tincidunt. Cras id justo lobortis, bibendum odio eu, viverra purus. Aenean eu accumsan arcu. Suspendisse non efficitur nisi.
+
+In sed lobortis nisl. Sed pretium tortor at commodo rutrum. Praesent lobortis, ante nec viverra imperdiet, orci ante pharetra velit, id rhoncus nibh ligula sit amet urna. Sed scelerisque sem eget tempor tincidunt. Fusce odio massa, porta et viverra eu, facilisis in tellus. Ut vitae ligula nisl. Praesent blandit ligula eu magna fermentum iaculis. Integer dapibus, lectus sit amet posuere consectetur, tellus sapien volutpat tortor, nec hendrerit nunc nibh ac mauris. Suspendisse pretium hendrerit eros, eget eleifend nisl accumsan at. Integer sed fringilla sapien. Fusce faucibus nisi elit, consequat rutrum tellus sodales sit amet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque hendrerit eleifend ex, quis sodales velit rutrum id. Nunc laoreet ipsum a finibus interdum.
+    </div>
+  </div>
+  <div class="col-3">
+    <div style="height: 750px; background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 20px; margin-bottom: 20px; overflow-y: auto;">
+      <div id="questionsPane" style="display: block;">
+          <h2>Questions</h2>
+          <p>This is the questions pane content.</p>
+      </div>
+      <div id="notesPane" style="display: none;">
+          <h2>Notes</h2>
+          <p>This is the notes pane content.</p>
+      </div>
+      <div id="chatPane" style="display: none;">
+          <h2>Chat</h2>
+          <p>This is the chat pane content.</p>
+      </div>
+  </div>
+  <div style="display: flex; justify-content: center;">
+      <button onclick="togglePane('questionsPane')" style="padding: 8px 24px; color: #FFFFFF; border-radius: 9999px; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; margin: 0 10px; background-color: #BD7EDE;">Questions</button>
+      <button onclick="togglePane('notesPane')" style="padding: 8px 24px; color: #FFFFFF; border-radius: 9999px; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; margin: 0 10px; background-color: #3478E9;">Notes</button>
+      <button onclick="togglePane('chatPane')" style="padding: 8px 24px; color: #000000; border-radius: 9999px; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; margin: 0 10px; background-color: #FAB60B;">Chat</button>
+  </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  function togglePane(paneId) {
+      const panes = ['questionsPane', 'notesPane', 'chatPane'];
+      panes.forEach(pane => {
+          document.getElementById(pane).style.display = pane === paneId ? 'block' : 'none';
+      });
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+  // Declare global variables with Django template variables
+  window.djangoData = {
+      lastCourseId: "{{ last_course_id.id }}"
+  };
+</script>
+<script src="{% static 'tours/maintour.js' %}"></script> 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    const intro = introJs();
+
+// Configure the steps
+intro.setOptions({
+  steps: [
+    {
+      element: '#feedbackDropdown',
+      intro: 'You can always go back to the tour by clicking here',
+      position: 'bottom'
+    },
+    {
+      element: '#startTour',
+      intro: 'And here',
+      position: 'bottom'
+    }
+  ],
+  exitOnOverlayClick: false,
+  showBullets: false,
+  showProgress: true
+});
+
+// Function to open the dropdown
+function openDropdown() {
+  return new Promise((resolve) => {
+    const dropdownElement = document.querySelector('#dropdownTarget');
+    if (dropdownElement) {
+      dropdownElement.classList.add('show');
+      // If using Bootstrap, you might use:
+      // $(dropdownElement).dropdown('show');
+    }
+    setTimeout(resolve, 300);
+  });
+}
+
+// Listen for 'beforeChange' event
+intro.onbeforechange(function(targetElement) {
+  if (targetElement.id === 'startTour') {
+    openDropdown().then(() => {
+      // Refresh the position of the tooltip after opening the dropdown
+      intro.refresh();
+    });
+  }
+});
+
+// Override the 'complete' method to close the dropdown
+intro.oncomplete(function() {
+  const dropdownElement = document.querySelector('#dropdownTarget');
+  if (dropdownElement) {
+    dropdownElement.classList.remove('show');
+    // TODO add a form submission to set tour variable to True
+  }
+});
+
+  
+
+    {% if not tour %}
+    var welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+    welcomeModal.show();
+    const beginTourBtn = document.getElementById('beginTourBtn');
+    const startLaterBtn = document.getElementById('startLaterBtn');
+  
+    function beginTour() {
+      welcomeModal.hide();
+      console.log('Beginning the tour...');
+    }
+  
+    function startLater() {
+      welcomeModal.hide();
+      fetch('/api/finish-tour/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}' 
+        },
+        body: JSON.stringify({}), // Add any payload data if needed
+        credentials: 'include' // Add this line
+      })
+        .then(response => {
+          // Handle the response
+        })
+        .catch(error => {
+          // Handle the error
+        });
+      intro.start()
+    }
+  
+    beginTourBtn.addEventListener('click', beginTour);
+    startLaterBtn.addEventListener('click', startLater);
+
+    {% endif %}
+    
+  
+    
+      const streakCounter = document.getElementById('streak-counter');
+      const timeDisplays = document.querySelectorAll('.time-display');
+      const targetStreak = {{learning_streak}}; // Replace with your actual user streak value from the backend
+      let currentCount = 0;
+  
+      // Predefined set of vibrant colors
+      const vibrantColors = [
+          '#8A2BE2', // Purple
+          '#FFD700', // Yellow
+          '#FF69B4', // Pink
+          '#FFA500', // Orange
+          '#FF0000', // Red
+          '#00FF00'  // Green
+      ];
+  
+      let lastColorIndex = -1;
+  
+      function easeOutQuad(t) {
+          return t * (2 - t);
+      }
+  
+      function getNextVibrantColor() {
+          let newIndex;
+          do {
+              newIndex = Math.floor(Math.random() * vibrantColors.length);
+          } while (newIndex === lastColorIndex);
+          lastColorIndex = newIndex;
+          return vibrantColors[newIndex];
+      }
+  
+      function animateCount(timestamp) {
+          if (!animateCount.startTime) {
+              animateCount.startTime = timestamp;
+          }
+  
+          const elapsed = timestamp - animateCount.startTime;
+          const duration = 3000; // Total animation duration in milliseconds
+          const progress = Math.min(elapsed / duration, 1);
+  
+          const newCount = Math.round(easeOutQuad(progress) * targetStreak);
+          
+          if (newCount !== currentCount) {
+              currentCount = newCount;
+              streakCounter.textContent = currentCount;
+              streakCounter.style.color = getNextVibrantColor();
+          }
+  
+          if (progress < 1) {
+              requestAnimationFrame(animateCount);
+          } else {
+              streakCounter.style.color = getNextVibrantColor();
+          }
+      }
+  
+      // Countdown timer function
+      function startCountdown() {
+          let totalSeconds = {{seconds_until_review}}; // 1 hour in seconds
+          let colorChangeCounter = 0;
+  
+          function updateCountdown() {
+              const days = Math.floor(totalSeconds / (3600 * 24));
+              const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+              const minutes = Math.floor((totalSeconds % 3600) / 60);
+              const seconds = totalSeconds % 60;
+  
+              timeDisplays[0].textContent = days;
+              timeDisplays[1].textContent = hours.toString().padStart(2, '0');
+              timeDisplays[2].textContent = minutes.toString().padStart(2, '0');
+              timeDisplays[3].textContent = seconds.toString().padStart(2, '0');
+  
+              if (totalSeconds > 0) {
+                  totalSeconds--;
+                  colorChangeCounter++;
+  
+                  if (colorChangeCounter >= 30) {
+                      const newColor = getNextVibrantColor();
+                      timeDisplays.forEach(display => {
+                          display.style.color = newColor;
+                      });
+                      colorChangeCounter = 0;
+                  }
+  
+                  setTimeout(updateCountdown, 1000);
+              }
+          }
+  
+          updateCountdown();
+      }
+  
+      // Start both animations
+      setTimeout(() => {
+          requestAnimationFrame(animateCount);
+          startCountdown();
+      }, 500);
+  });
+  </script>
+{% endblock %}
