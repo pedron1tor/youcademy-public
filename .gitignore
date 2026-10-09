@@ -1,0 +1,47 @@
+# Secrets and credentials - never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*service-account*.json
+*credentials*.json
+
+# Databases and user data
+*.sqlite3
+dump.rdb
+uploads/
+audio_recordings/
+tts_audio/
+
+# Python
+venv/
+myenv/
+.venv/
+__pycache__/
+*.py[cod]
+debug.log
+*.log
+
+# Node / React builds
+node_modules/
+reactapps/*/build/
+
+# Generated static files (run `python manage.py collectstatic`)
+staticfiles/
+
+# Third-party themes and large assets (licensed separately)
+themes/
+
+# Local scratch files
+tests.ipynb
+helper.txt
+data.jsonl
+data2.jsonl
+gpt's.ipynb
+
+# Editors and OS
+.vscode/
+.idea/
+**/.DS_Store

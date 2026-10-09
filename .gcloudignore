@@ -1,0 +1,14 @@
+.vscode
+reactapps
+staticfiles
+themes
+uploads
+.DS_Store
+.gitignore
+README.md
+docs.md
+.github
+doc
+tests
+venv
+docs
